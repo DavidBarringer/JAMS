@@ -1,0 +1,422 @@
+@charset "utf-8";
+
+// Set your brand colors
+$uwcs_yellow: #FDD835;
+$uwcs_blue: #3D5AFE;
+$warwickgg_black: #222528;
+$warwickgg_dark_grey: #2D3338;
+$warwickgg_blue_shadow: #162160;
+$warwickgg_light_blue: #E4E8FF;
+$warwickgg_light_blue_shadow: #383A46;
+$uwcs_blue_dark: #364CCD;
+$uwcs_yellow_dark: #D5B00B;
+
+// Update Bulma's global variables
+$family-sans-serif: "Nunito", sans-serif;
+$body-color: #ffffff;
+$table-color: #ffffff;
+$table-background-color: $warwickgg_dark_grey;
+$widescreen-enabled: false;
+$fullhd-enabled: false;
+
+// Update some of Bulma's component variables
+$control-border-width: 2px;
+$input-border-color: transparent;
+$input-shadow: none;
+$body-background-color: $warwickgg_black;
+$link-hover: white;
+$link-focus-border: white;
+
+@import "~bulma/bulma";
+@import "../../node_modules/bulma/sass/utilities/_all.sass";
+@import "../../node_modules/bulma/sass/base/_all.sass";
+@import "../../node_modules/bulma/sass/elements/button.sass";
+@import "../../node_modules/bulma/sass/elements/container.sass";
+@import "../../node_modules/bulma/sass/elements/form.sass";
+@import "../../node_modules/bulma/sass/elements/title.sass";
+@import "../../node_modules/bulma/sass/layout/hero.sass";
+@import "../../node_modules/bulma/sass/layout/section.sass";
+
+.templateBody{
+  padding-bottom: 1rem;
+}
+
+.altTemplateBody{
+  padding-bottom: 5rem;
+}
+
+.alias{
+  height: 1.5rem;
+  width: 15rem;
+}
+
+.aliasButton{
+  white-space: nowrap;
+  float: right;
+  padding-left: 0.5rem;
+  padding-top: 0.25rem;
+  padding-right: 0.5rem;
+  height: 2rem;
+  color: inherit;
+  max-width: 20rem;
+  border-bottom: 1px solid white;
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-radius: 0 0 0 1rem;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  a{
+    text-decoration: none;
+    color: inherit;
+  }
+  a:hover{
+    color: white;
+  }
+}
+
+.bucket{
+  background-color: $warwickgg_dark_grey;
+  margin: 1rem;
+  padding: 1rem;
+  border: 0.05rem solid #ffffff;
+  border-radius: $radius;
+  font-size: 1rem;
+  min-width: 80%;
+
+  .finished{
+    color: darken($white, 20%);
+  }
+
+  thead{
+    border-bottom: 2px solid white;
+    height: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  th{
+    height: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  td{
+    text-align: right;
+    padding-top: 0.4rem;
+  }
+
+  .test{
+    width: 100%
+  }
+
+  .button{
+    background: $red;
+    color: $white;
+    border-color: darken($red, 20%);
+    vertical-align: middle;
+    height: 1.5rem;
+    padding: 0;
+    font-size: 1rem;
+  }
+
+  .title{
+    text-align: left;
+    color: inherit;
+    vertical-align: middle;
+    a{
+      text-decoration: none;
+      color: inherit;
+    }
+    button{
+      padding: 0;
+      text-decoration: none;
+      color: inherit;
+    }
+    font-size: 1rem;
+    max-width: 40vw;
+  }
+
+  .name{
+    text-align: right;
+    vertical-align: middle;
+    max-width: 20vw;
+    overflow-x: hidden;
+  }
+
+  .adminButton{
+    padding-right: 0px;
+    width: 5rem;
+  }
+
+  .count{
+    float: right;
+    font-size: 0.75rem;
+  }
+
+  .time{
+    font-size: 0.75rem;
+  }
+}
+
+.full{
+  border-color: $red;
+}
+
+.available{
+  border-color: $green;
+}
+
+.cFull{
+  color: $red;
+}
+
+.alias{
+  float: right;
+}
+
+.slide-in-leave-to,
+.slide-in-enter{ margin-bottom: -5rem }
+.slide-in-enter-to,
+.slide-in-leave{ margin-bottom: 0rem }
+.slide-in-enter-active,
+.slide-in-leave-active { transition: 750ms }
+
+
+.bottomPanel{
+  width: 100%;
+  position: fixed;
+  bottom: 0rem;
+}
+
+.panelButton{
+  height: 0.5rem;
+  background-color: $warwickgg_dark_grey;
+  border-top: 2px solid white;
+  border-right: 2px solid white;
+  border-left: 2px solid white;
+  border-radius: 0.5rem 0.5rem 0 0;
+  text-align: center;
+
+  .button:focus:not(:active){
+    box-shadow: 0 0 0 0;
+    color: $warwickgg_light_blue_shadow;
+  }
+
+  .button{
+    position: absolute;
+    margin-top: -1rem;
+    padding: 0;
+    span{
+      position: relative;
+      width: calc(3rem - 4px);
+      background-color: inherit;
+      border-radius: 5px 5px 0 0;
+      z-index: 20;
+    }
+    left: 50%;
+    color: white;
+    background-color: $warwickgg_dark_grey;
+    border-bottom: 0px;
+    border: 0;
+    width: 3rem;
+    height: 1rem;
+  }
+
+  .button:hover{
+    border-color: white;
+  }
+
+  .button::before{
+    display: block;
+    content: " ";
+    position: absolute;
+    top: 0;
+    margin-top: -2px;
+    height: calc(1rem + 2px);
+    width: 3rem;
+    right: -1rem;
+    transform: skew(30deg, 0deg);
+    background-color: $warwickgg_dark_grey;
+    border-right: 2px white solid;
+    border-top: 2px white solid;
+    border-radius: 0 5px 0 0;
+    z-index: 2;
+  }
+
+  .button::after{
+    left: -1rem;
+    transform: skew(-30deg, 0deg);
+    display: block;
+    content: " ";
+    position: absolute;
+    top: 0;
+    margin-top: -2px;
+    height: calc(1rem + 2px);
+    width: 3rem;
+    background-color: $warwickgg_dark_grey;
+    border-left: 2px white solid;
+    border-top: 2px white solid;
+    border-radius: 5px 0 0 0;
+    z-index: 2;
+  }
+
+  .icon{
+    position: relative;
+    z-index: 5;
+  }
+}
+
+
+.adminPanel{
+  position: relative;
+  background-color: $warwickgg_dark_grey;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+  padding-left: 1rem;
+
+  .input{
+    width: 20vw;
+  }
+
+  .adminTitle{
+    font-size: 1.5rem;
+  }
+
+  .hiddenPanel{
+    height: 5rem;
+  }
+  .activePanel{
+    height: 1rem;
+  }
+
+  .adminSetting1{
+    position: absolute;
+    bottom: 3rem;
+    right: 2rem;
+  }
+
+  .adminSetting2{
+    position: absolute;
+    bottom: 3rem;
+    right: 20rem;
+  }
+
+  .adminSetting3{
+    position: absolute;
+    bottom: 1rem;
+    right: 20rem;
+  }
+
+  .adminSubmit{
+    position: absolute;
+    bottom: 1rem;
+    right: 2rem;
+  }
+}
+
+.aliasInput{
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+  float: right;
+  width: 20rem;
+  padding-top: 0.25rem;
+  height: 2rem;
+  .button{
+    height: 1.5rem;
+    padding: 0;
+    float: right;
+  }
+}
+
+.videoSubmission{
+  padding: 1rem;
+  margin-left: 5vw;
+  margin-right: 20rem;
+  border: 2px solid white;
+  border-radius: 2rem;
+  width: 60vw;
+  //height: 10rem;
+
+  .message{
+    background-color: inherit;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .input{
+    width: 20rem;
+  }
+
+  .timeInput{
+    width: 4rem;
+  }
+}
+
+.uploadTabs{
+  margin-bottom: 0;
+  height: 2rem;
+  margin-left: calc(5vw + 3rem);
+
+  a{
+    color: white;
+    float: left;
+    background-color: $warwickgg_black;
+    text-align: center;
+    margin-right: 1.5rem;
+    height: inherit;
+    top: -1.5rem;
+    span{
+      position: relative;
+      top: -1.5rem;
+      width: calc(3rem - 4px);
+      background-color: inherit;
+      border-radius: 5px 5px 0 0;
+      height: inherit;
+      z-index: 10;
+    }
+  }
+
+  a::before{
+    position: relative;
+    right: -0.75rem;
+    display: block;
+    content: " ";
+    height: 2rem;
+    width: 2rem;
+    transform: skew(30deg, 0deg);
+    background-color: $warwickgg_black;
+    border-right: 2px white solid;
+    border-top: 2px white solid;
+    border-radius: 0 5px 0 0;
+  }
+
+
+  a::after{
+    transform: skew(-30deg, 0deg);
+    position: relative;
+    left: -0.75rem;
+    bottom: 3.5rem;
+    display: block;
+    content: " ";
+    height: 2rem;
+    width: 2rem;
+    background-color: $warwickgg_black;
+    border-left: 2px white solid;
+    border-top: 2px white solid;
+    border-radius: 5px 0 0 0;
+  }
+
+  a.active{
+    background-color: $warwickgg_dark_grey
+  }
+
+  a.active::before{
+    background-color: $warwickgg_dark_grey;
+    z-index: 3;
+  }
+
+  a.active::after{
+    background-color: $warwickgg_dark_grey;
+    z-index: 3;
+  }
+}
+
+// Import only what you need from Bulma
