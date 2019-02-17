@@ -2,6 +2,7 @@ var jsonfile = require('jsonfile');
 var fs = require('fs');
 try{
   fs.mkdirSync("./list/");
+  fs.writeFileSync('./list/buckets.json', '');
 }
 catch(e){}
 var locked = false;
