@@ -14,6 +14,3 @@ Available at the given links or on all good package managers.
 ⋅[youtube-dl](https://rg3.github.io/youtube-dl/)(Try to keep as up-to-date as possible)  
 ⋅[vlc](https://www.videolan.org/vlc/index.en-GB.html)  
 ⋅[ffmpeg](https://www.ffmpeg.org/)
-
-##License
-You may use/modify this music server as much as you like, but you may not attempt to use this software in any way to make any legal entity money.
