@@ -43,7 +43,7 @@ function availableBucket(buckets, user, duration){
     if(notFull)
       return new Promise(resolve => resolve(i));
   }
-  return new Promise(resolve => resolve(-1));
+  return new Promise((resolve,reject) => reject(-1));
 }
 
 try{

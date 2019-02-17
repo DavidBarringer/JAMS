@@ -31,7 +31,7 @@ module.exports={
   },
 
   getConfig: function(){
-    return config;
+    return jsonfile.readFileSync('configActive.json0');
   },
 
   changeConfig: function(newConfig){

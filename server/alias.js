@@ -1,5 +1,6 @@
 var aliases = [];
 var csv = require('csvtojson');
+var logger = require('../log/logger.js');
 module.exports={
   aliasSet: function(ip, alias){
     var obj = {ip:ip,alias:alias};
