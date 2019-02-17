@@ -112,15 +112,17 @@ module.exports = {
           obj = {ip:ip, title:info.title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
           buckets[bucket].push(obj);
           playlist.unlock();
-          playlist.write(buckets).then((res) => {
+          playlist.write(buckets).then((result) => {
             playlist.unlock();
             vid.pipe(fs.createWriteStream('tmp/'+ filename +'.mp4'));
             logger.log("Video uploaded via url" + obj);
           });
         }).catch((e) => {
-          fs.unlinkSync("./tmp/" + imagePath);
+          if(imagePath){
+            fs.unlinkSync("./tmp/" + imagePath);
+          }
           logger.log(ip + " attempted to upload a video, but they had no available buckets.");
-          res.send("Cannot upload video -- You don't enough bucket space");
+          res.status(400).send("Cannot upload video -- You don't enough bucket space");
         });
       });
     });
@@ -133,7 +135,7 @@ module.exports = {
           }
           bucketInfo[i].played = false;
           playlist.unlock();
-          playlist.write(buckets).then((res) => {
+          playlist.write(buckets).then((result) => {
             logger.log("Video finished downloading " + bucketInfo[i]);
             playlist.unlock();
           });
@@ -274,13 +276,13 @@ module.exports = {
         var obj = {ip: ip, title: data.filename, path: "./tmp/" + path.split("/")[2], duration: sTime, startTime: startTime, endTime: endTime, toFillTime: toFillTime, filename: path.split("/")[2], played: false, image: imagePath};
         buckets[bucket].push(obj);
         playlist.unlock();
-        playlist.write(buckets).then((res) => {
+        playlist.write(buckets).then((result) => {
           logger.log("Video uploaded via manual upload " + obj);
           playlist.unlock();
         });
       }).catch((e) => {
         logger.log(ip + " attempted to upload a video, but they had no available buckets.");
-        res.send("Cannot upload video -- You don't enough bucket space");
+        res.status(400).send("Cannot upload video -- You don't enough bucket space");
       });
     });
   },

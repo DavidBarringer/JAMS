@@ -602,6 +602,9 @@
         },
 
         checksTime(){
+          if(!this.url){
+            return;
+          }
           var regex = /.?.:../;
           if (!regex.test(this.startTime) && this.startTime != ""){
             this.message = "Invalid start time";
@@ -629,6 +632,9 @@
           }
         },
         checkfSTime(){
+          if(!this.url){
+            return;
+          }
           var regex = /.?.:../;
           if (!regex.test(this.fStartTime) && this.fStartTime != ""){
             this.fMessage = "Invalid start time";
@@ -656,6 +662,9 @@
           }
         },
         checkeTime(){
+          if(!this.url){
+            return;
+          }
           var regex = /.?.:../;
           if (!regex.test(this.endTime) && this.endTime != ""){
             this.message = "Invalid end time";
@@ -684,6 +693,9 @@
           }
         },
         checkfETime(){
+          if(!this.url){
+            return;
+          }
           var regex = /.?.:../;
           if (!regex.test(this.fEndTime) && this.fEndTime != ""){
             this.fMessage = "Invalid end time";

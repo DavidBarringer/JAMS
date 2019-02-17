@@ -23,16 +23,16 @@ function getTime(){
 module.exports={
   log: function(message){
     var ms = getTime() + "[LOG]: " + message;
-    fs.writeFileSync(path, ms, {flags: 'a+'});
+    fs.writeFileSync(path, ms, {flag: 'a+'});
   },
 
   warn: function(message){
     var ms = getTime() + "[WARN]: " + message;
-    fs.writeFileSync(path, ms, {flags: 'a+'});
+    fs.writeFileSync(path, ms, {flag: 'a+'});
   },
 
   error: function(message){
     var ms = getTime() + "[ERROR]: " + message;
-    fs.writeFileSync(path, ms, {flags: 'a+'});
+    fs.writeFileSync(path, ms, {flag: 'a+'});
   }
 }
