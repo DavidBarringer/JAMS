@@ -12,17 +12,7 @@ setInterval(function(){
     if(currentBucket.length != 0){
       if(i == currentBucket.length){
         currentBucket = buckets.shift();
-        for(var j = 0; j < currentBucket.length; j++){
-          try{
-            fs.unlinkSync('./tmp/' + currentBucket[j].filename);
-            if(vid.image){
-              fs.unlinkSync('./tmp/' + currentBucket[j].image);
-            }
-          }
-          catch(e){
-            logger.error("An error occured trying to remove video file " + vid + "\nError: " + e);
-          }
-        }
+        clearBucket(currentBucket);
         buckets.push([]);
         playlist.unlock();
         playlist.write(buckets).then((res) => playlist.unlock());
@@ -63,8 +53,10 @@ function play(vid){
   else if(vid.endTime)
     stoptime = Math.min(vid.endTime, maxLength);
   if(vid.image){
-    exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit --no-qt-fs-controller --image-duration " + runtime + (vid.startTime ? ' --start-time ' + vid.startTime :''));
-    exec.execSync("cvlc --demux=avformat,none --codec=avcodec,all -ldummy --play-and-exit --stop-time " + runtime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
+    exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit " +
+    "--no-qt-fs-controller --image-duration " + stoptime +
+    (vid.startTime ? ' --start-time ' + vid.startTime :''), {windowsHide: true});
+    exec.execSync("cvlc --demux=avformat,none --codec=avcodec,all --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
     exec.execSync('pkill vlc');
   }
   else
@@ -80,3 +72,19 @@ function play(vid){
   });
   console.log("Done");
 };
+
+function clearBucket(bucket){
+  for(var j = 0; j < bucket.length; j++){
+    logger.log(bucket[j].filename);
+    logger.log(bucket[j].image);
+    try{
+      fs.unlinkSync('./tmp/' + bucket[j].filename);
+      if(bucket[j].image){
+        fs.unlinkSync('./tmp/' + bucket[j].image);
+      }
+    }
+    catch(e){
+      logger.error("An error occured trying to remove video file " + bucket[j].filename + "\nError: " + e);
+    }
+  }
+}
