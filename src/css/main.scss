@@ -78,13 +78,21 @@ $link-focus-border: white;
   background-color: $warwickgg_dark_grey;
   margin: 1rem;
   padding: 1rem;
-  border: 0.05rem solid #ffffff;
+  border: 0.1rem solid #ffffff;
   border-radius: $radius;
   font-size: 1rem;
   min-width: 80%;
 
   .finished{
-    color: darken($white, 20%);
+    color: darken($white, 40%);
+  }
+
+  .playing{
+    background-color: $uwcs_blue;
+  }
+
+  .spacer{
+    height: 0.4rem;
   }
 
   thead{
@@ -98,9 +106,12 @@ $link-focus-border: white;
     margin-top: 2rem;
   }
 
+  tr{
+    width: 100%;
+  }
+
   td{
     text-align: right;
-    padding-top: 0.4rem;
   }
 
   .test{
@@ -112,13 +123,14 @@ $link-focus-border: white;
     color: $white;
     border-color: darken($red, 20%);
     vertical-align: middle;
-    height: 1.5rem;
+    height: inherit;
     padding: 0;
     font-size: 1rem;
   }
 
   .title{
     text-align: left;
+    padding-left: 0.25rem;
     color: inherit;
     vertical-align: middle;
     a{
@@ -142,17 +154,17 @@ $link-focus-border: white;
   }
 
   .adminButton{
-    padding-right: 0px;
+    padding: 0px;
     width: 5rem;
   }
 
   .count{
     float: right;
-    font-size: 0.75rem;
+    font-size: 1rem;
   }
 
   .time{
-    font-size: 0.75rem;
+    font-size: 1rem;
   }
 }
 
@@ -337,8 +349,7 @@ $link-focus-border: white;
 
   .message{
     background-color: inherit;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .input{

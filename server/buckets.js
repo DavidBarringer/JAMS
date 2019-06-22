@@ -84,7 +84,6 @@ module.exports = {
         filename = info._filename;
         console.log(info.duration);
         playlist.read().then((buckets) => {
-          //Function that takes time of the form hh:mm:ss and converts it to seconds
           var sTime;
           if(data.toFillTime)
             sTime = toFillTime;
@@ -93,6 +92,7 @@ module.exports = {
           else if (endTime)
             sTime = endTime;
           else {
+            //Function that takes time of the form hh:mm:ss and converts it to seconds
             var a = info.duration.split(':');
             sTime = a.reduce((acc, time) => (60 * acc) + +time);
             if(startTime)
@@ -109,13 +109,13 @@ module.exports = {
             filename = hash.digest('hex');
             vid.pipe(fs.createWriteStream('tmp/'+ filename +'.mp4'));
             bucket = result;
-            res.send("Video uploaded");
             obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
             buckets[bucket].push(obj);
             playlist.unlock();
             playlist.write(buckets).then((result) => {
               playlist.unlock();
               logger.log("Video uploaded via url" + obj);
+              res.send("Video uploaded");
             });
             vid.on('end', function(){
               playlist.read().then((buckets) => {

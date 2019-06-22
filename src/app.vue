@@ -15,12 +15,12 @@
       </div>
       <div v-bind:hidden="activeTab != 0" class = "videoSubmission">
         <form v-on:submit.prevent="addUrl">
-          <div>
-            <input class="input" type="text" v-model="url" placeholder="enter a url">
-            <button class="button" v-bind:disabled="!canUpload">Submit</button>
-          </div>
           <div class="message">
             {{ message }}
+          </div>
+          <div>
+            <input class="input" type="text" v-bind:disabled="uploading" v-model="url" placeholder="enter a url">
+            <button class="button" v-bind:disabled="!canUpload">Submit</button>
           </div>
           <div>
             <input type="checkbox" v-model="startCheck" v-bind:disabled="!canUpload">Set start time</input>
@@ -48,7 +48,7 @@
         <form v-on:submit.prevent="uploadVideo">
           <div class="file has-name">
             <label class="file-label">
-              <input class="file-input" v-if="(!clearFile)" accept="audio/*,video/*" ref="uploadFile" v-on:change="fileCheck" type="file" name="resume">
+              <input class="file-input" v-bind:disabled="uploading" v-if="(!clearFile)" accept="audio/*,video/*" ref="uploadFile" v-on:change="fileCheck" type="file" name="resume">
               <span class="file-cta">
                 <span class="file-label">Upload a video</span>
               </span>
@@ -82,7 +82,7 @@
         </form>
       </div>
       <div class = "bucket" v-bind:class="[{full: isFull(bucket)},{available: isAvailable(index)}]"v-for="(bucket,index) in items">
-        <span class="icon" v-bind:class="{cFull: tFull(bucket)}"><i class="fas fa-stopwatch"></i></span><span class="time" v-bind:class="{cFull: tFull(bucket)}"> - {{ bucketTime(bucket) }}</span>
+        <span class="icon is-medium" v-bind:class="{cFull: tFull(bucket)}"><i class="fas fa-lg fa-stopwatch"></i></span><span class="time" v-bind:class="{cFull: tFull(bucket)}"> - {{ bucketTime(bucket) }}</span>
         <span class="count" v-bind:class="{cFull: cFull(bucket)}">{{ bucketCount(bucket) }}</span>
         <table class="test">
           <thead>
@@ -91,17 +91,20 @@
             <th></th>
           </thead>
           <tbody>
-            <tr v-for="(song,sIndex) in bucket" v-bind:class="{finished: song.played == 'done'}">
-              <td class="title">
-                <a v-if="(song.url)" v-bind:href="song.url">{{ song.title }}</a>
-                <a v-else v-on:click="download(song.path)">{{ song.title }}</a>
-              </td>
-              <td class="name" v-bind:title="getAlias(song.ip)">{{ getAlias(song.ip) }}</td>
-              <td class="adminButton">
-                <button v-if="(song.ip==ip || adminSession==true) && (!song.played || song.played == 'downloading')" v-on:click="removeSong(index,sIndex,song.ip)" class="button is-small is-right">Remove</button>
-                <button v-else-if="(song.ip==ip || adminSession==true) && (song.played == 'playing')" v-on:click="killSong(index,sIndex,song.ip)" class="button is-small is-right">Kill</button>
-              </td>
-            </tr>
+            <template v-for="(song,sIndex) in bucket">
+              <tr class="spacer"></tr>
+              <tr v-bind:class="{finished: song.played == 'done', playing: song.played == 'playing'}">
+                <td class="title">
+                  <a v-if="(song.url)" v-bind:href="song.url">{{ song.title }}</a>
+                  <a v-else v-on:click="download(song.path)">{{ song.title }}</a>
+                </td>
+                <td class="name" v-bind:title="getAlias(song.ip)">{{ getAlias(song.ip) }}</td>
+                <td class="adminButton">
+                  <button v-if="(song.ip==ip || adminSession==true) && (!song.played)" v-on:click="removeSong(index,sIndex,song.ip)" class="button is-small is-right">Remove</button>
+                  <button v-else-if="(song.ip==ip || adminSession==true) && (song.played == 'playing')" v-on:click="killSong(index,sIndex,song.ip)" class="button is-small is-right">Kill</button>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -188,6 +191,7 @@
         status: "",
         items: [],
         currentIndex: 0,
+        uploading: false,
 
         adminPanel: false,
         password: "",
@@ -245,11 +249,11 @@
           if(this.url != "")
             this.debouncedCheckURL();
           else{
-            this.message = "";
             this.availableBucket = -1;
             this.canUpload = false;
             this.endTime = "";
             this.eTime = 9*60+7;
+            this.message = "";
           }
         },
         startTime: function (t1, t2){
@@ -306,7 +310,7 @@
 
       created: function(){
         var x = this;
-        x.debouncedCheckURL = x.$_.debounce(this.checkUrl, 100);
+        x.debouncedCheckURL = x.$_.debounce(this.checkUrl, 1000);
         x.debouncedChecksTime = x.$_.debounce(this.checksTime, 1000);
         x.debouncedCheckeTime = x.$_.debounce(this.checkeTime, 1000);
         x.debouncedCheckfSTime = x.$_.debounce(this.checkfSTime, 1000);
@@ -365,7 +369,6 @@
               this.endTime = this.timeToString(this.newVideoDuration);
               var a = this.endTime.split(':');
               this.eTime = a.reduce((acc, time) => (60 * acc) + +time);
-              this.canUpload = true;
               this.findAvailableBucket();
             }).catch((err) => {
               this.message = err.response.data;
@@ -417,7 +420,6 @@
             var a = this.fEndTime.split(':');
             this.fETime = a.reduce((acc, time) => (60 * acc) + +time);
             this.filepath = response.data.filepath;
-            this.fCanUpload = true;
             this.findAvailableBucket();
           }).catch((err) => {
             this.fMessage = err.response.data;
@@ -476,6 +478,7 @@
             this.fMessage = "No space to upload this video";
         },
         async addUrl(){
+          this.uploading = true;
           var formData = new FormData;
           formData.set('type', 'url');
           formData.set('url', this.url);
@@ -485,6 +488,8 @@
           if(this.image){
             formData.append('image', this.image);
           }
+          this.image = 0;
+          this.canUpload = false;
           this.url = "";
           this.newVideoName = "";
           this.startTime = "";
@@ -495,17 +500,24 @@
           this.endCheck = false;
           this.toFillCheck = false;
           this.newVideoDuration = 0;
-          this.availableBucket = -1;
-          this.image = 0;
-          this.canUpload = false;
           var result = this.axios.post("/upload", formData,{
             headers:{
               "Content-Type" : "multipart/form-data"
             }
-          }).then((res) => this.message = res.data
-          ).catch((err) => this.message = err.response.data);
+          }).then((res) => {
+            this.$nextTick(() => {
+              this.availableBucket = -1;
+              this.uploading = false;
+            });
+            this.printMessage(res.message);
+          }
+        ).catch((err) => {
+          this.printMessage(err.response.data);
+          this.uploading = false;
+        });
         },
         async uploadVideo(){
+          this.uploading = true;
           var formData = new FormData();
           formData.set('type', 'file');
           formData.set('filepath', this.filepath);
@@ -517,34 +529,50 @@
           if(this.fImage){
             formData.append('fImage', this.fImage);
           }
+          this.file = "";
+          this.clearFile = true;
+          this.filepath = "";
+          this.fNewVideoName = "";
+          this.fStartTime = "";
+          this.fSTime = 0;
+          this.fEndTime = "";
+          this.fETime = 0;
+          this.fStartCheck = false;
+          this.fEndCheck = false;
+          this.fToFillCheck = false;
+          this.fNewVideoDuration = 0;
+          this.fImage = "";
+          this.availableBucket = -1;
           var result = this.axios.post("/upload",formData,{
             headers:{
               "Content-Type" : "multipart/form-data"
             }
           }).then((res) => {
-            this.fMessage = res.data;
-            this.file = "";
-            this.filepath = "";
-            this.fNewVideoName = "";
-            this.fStartTime = "";
-            this.fSTime = 0;
-            this.fEndTime = "";
-            this.fETime = 0;
-            this.fStartCheck = false;
-            this.fEndCheck = false;
-            this.fToFillCheck = false;
-            this.fImage = "";
-            this.availableBucket = -1;
-          	this.clearFile = true;
+            this.printfMessage(res.message);
             this.$nextTick(() => {
+              this.availableBucket = -1;
+              this.fCanUpload = false;
             	this.clearFile = false;
+              this.uploading = false;
             });
-            this.fNewVideoDuration = 0;
-            this.availableBucket = -1;
-            this.fCanUpload = false;
           }).catch((err) => {
-            this.message = err.response.data;
+            this.printfMessage(err.response.data);
+            this.uploading = false;
           });
+        },
+
+        printMessage(message){
+          this.message = message;
+          setTimeout(function(){
+            this.message = "";
+          }, 1000);
+        },
+
+        printfMessage(message){
+          this.fMessage = message;
+          setTimeout(function(){
+            this.fMessage = "";
+          }, 1000);
         },
 
         download(filepath){
@@ -572,15 +600,19 @@
           }
           return false;
         },
+
         isAvailable(index){
           return index == this.availableBucket;
         },
+
         cFull(bucket){
           return this.bucketCount(bucket) == "0/" + this.bucketVideos;
         },
+
         tFull(bucket, additional){
           return this.bucketTime(bucket) == "0:00";
         },
+
         removeSong(index,sIndex,ip){
           this.items[index].splice(sIndex,1);
           var result = this.axios.post("/remove",{
@@ -589,9 +621,11 @@
             ip: ip
           }).then((res)=>{});
         },
+
         killSong(){
           var result = this.axios.post("/kill").then((res)=>{});
         },
+
         bucketTime(bucket){
           var time = this.bucketLength;
           for(var i = 0; i < bucket.length; i++){
