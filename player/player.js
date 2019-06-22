@@ -56,7 +56,7 @@ function play(vid){
     exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit " +
     "--no-qt-fs-controller --image-duration " + stoptime +
     (vid.startTime ? ' --start-time ' + vid.startTime :''), {windowsHide: true});
-    exec.execSync("cvlc --demux=avformat,none --codec=avcodec,all --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
+    exec.execSync("vlc --demux=avformat,none --codec=avcodec,all --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename, {windowsHide:true});
     exec.execSync('pkill vlc');
   }
   else
