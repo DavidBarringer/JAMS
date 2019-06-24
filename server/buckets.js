@@ -131,6 +131,7 @@ module.exports = {
                     playlist.unlock();
                   });
                 }
+                playlist.unlock();
               });
             });
           }).catch((e) => {
