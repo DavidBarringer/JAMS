@@ -153,21 +153,26 @@ module.exports = {
       res.status(400).send("Cannot upload a playlist");
       return;
     }
-    ytdl.getInfo(url, function(err,info){
-      if(err){
-        res.status(400).send("Cannot upload, check the url and try again");
-        return;
-      }
-      if(!info.duration){
-        res.status(400).send("Cannot upload, check the url and try again");
-        logger.log("WEIRD FUCKERY: " + JSON.stringify(info));
-        return;
-      }
-      var a = info.duration.split(':');
-      var sTime = a.reduce((acc, time) => (60 * acc) + +time);
-      var obj = {newVideoName: info.title, newVideoDuration: sTime};
-      res.send(obj);
-    });
+    try{
+      ytdl.getInfo(url, function(err,info){
+        if(err){
+          res.status(400).send("Cannot upload, check the url and try again");
+          return;
+        }
+        if(!info.duration){
+          res.status(400).send("Cannot upload, check the url and try again");
+          logger.error("WEIRD FUCKERY: " + JSON.stringify(info));
+          return;
+        }
+        var a = info.duration.split(':');
+        var sTime = a.reduce((acc, time) => (60 * acc) + +time);
+        var obj = {newVideoName: info.title, newVideoDuration: sTime};
+        res.send(obj);
+      });
+    }
+    catch(e){
+      logger.error("youtube-dl fucked up");
+    }
   },
 
   rm: function(index,sIndex,ip){
