@@ -37,18 +37,21 @@ module.exports = {
   },
   read: function(){
     while(locked){}
-    locked = true;
+    this.lock();
     var result = jsonfile.readFileSync('./list/buckets.json');
     return new Promise((resolve) => resolve(result));
   },
   write: function(data){
     while(locked){}
-    locked = true;
+    this.lock();
     var result = jsonfile.writeFileSync('./list/buckets.json', data,{spaces:2,EOL: '\r\n'});
     return new Promise((resolve) => resolve(result));
   },
   lock: function(){
     locked = true;
+    setTimeout(function(){
+      locked = false;
+    }, 5000);
   },
   unlock: function(){
     locked = false;

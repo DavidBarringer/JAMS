@@ -76,7 +76,7 @@ module.exports = {
     }
     ytdl.getInfo(url, function(err,info){
       if(err){
-        logger.warn("Video upload failed: " + err);
+        logger.warn("Video upload failed: " + JSON.stringify(err));
         res.status(400).send("Cannot upload, check the url and try again");
       }
       else{
@@ -114,7 +114,7 @@ module.exports = {
             playlist.unlock();
             playlist.write(buckets).then((result) => {
               playlist.unlock();
-              logger.log("Video uploaded via url" + obj);
+              logger.log("Video uploaded via url" + JSON.stringify(obj));
               res.send("Video uploaded");
             });
             vid.on('end', function(){
@@ -127,7 +127,7 @@ module.exports = {
                   bucketInfo[i].played = false;
                   playlist.unlock();
                   playlist.write(buckets).then((result) => {
-                    logger.log("Video finished downloading " + bucketInfo[i]);
+                    logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
                     playlist.unlock();
                   });
                 }
@@ -139,7 +139,7 @@ module.exports = {
             if(imagePath){
               fs.unlinkSync("./tmp/" + imagePath);
             }
-            logger.log(ip + " attempted to upload a video, but they had no available buckets.");
+            logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
             res.status(400).send("Cannot upload video -- You don't enough bucket space");
             playlist.unlock();
           });
@@ -158,6 +158,11 @@ module.exports = {
         res.status(400).send("Cannot upload, check the url and try again");
         return;
       }
+      if(!info.duration){
+        res.status(400).send("Cannot upload, check the url and try again");
+        logger.log("WEIRD FUCKERY: " + JSON.stringify(info));
+        return;
+      }
       var a = info.duration.split(':');
       var sTime = a.reduce((acc, time) => (60 * acc) + +time);
       var obj = {newVideoName: info.title, newVideoDuration: sTime};
@@ -172,7 +177,7 @@ module.exports = {
         var song = bucket.splice(sIndex, 1);
         playlist.unlock();
         playlist.write(buckets).then((res)=>{
-          logger.log("Video removed " + song);
+          logger.log("Video removed " + JSON.stringify(song));
           fs.unlinkSync('./tmp/' + song[0].filename);
           playlist.unlock();
           reallocate(buckets, index, ip);
@@ -280,11 +285,11 @@ module.exports = {
         buckets[bucket].push(obj);
         playlist.unlock();
         playlist.write(buckets).then((result) => {
-          logger.log("Video uploaded via manual upload " + obj);
+          logger.log("Video uploaded via manual upload " + JSON.stringify(obj));
           playlist.unlock();
         });
       }).catch((e) => {
-        logger.log(ip + " attempted to upload a video, but they had no available buckets.");
+        logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
         res.status(400).send("Cannot upload video -- You don't enough bucket space");
         playlist.unlock();
       });
