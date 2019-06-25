@@ -66,7 +66,7 @@ function play(vid){
     vid = currentBucket[i];
     vid.played = "done";
     playlist.unlock();
-    logger.log("Video ended " + vid);
+    logger.log("Video ended " + JSON.stringify(vid));
     playlist.write(buckets).then((res) => playlist.unlock());
     i++;
   });
@@ -75,8 +75,8 @@ function play(vid){
 
 function clearBucket(bucket){
   for(var j = 0; j < bucket.length; j++){
-    logger.log(bucket[j].filename);
-    logger.log(bucket[j].image);
+    logger.log(JSON.stringify(bucket[j].filename));
+    logger.log(JSON.stringify(bucket[j].image));
     try{
       fs.unlinkSync('./tmp/' + bucket[j].filename);
       if(bucket[j].image){
@@ -84,7 +84,7 @@ function clearBucket(bucket){
       }
     }
     catch(e){
-      logger.error("An error occured trying to remove video file " + bucket[j].filename + "\nError: " + e);
+      logger.error("An error occured trying to remove video file " + JSON.stringify(bucket[j].filename) + "\nError: " + e);
     }
   }
 }

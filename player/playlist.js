@@ -5,8 +5,8 @@ try{
   fs.writeFileSync('./list/buckets.json', '');
 }
 catch(e){}
-var locked = false;
 var admin = require('../server/admin.js');
+var logger = require('../log/logger.js');
 
 module.exports = {
   new: function(){
@@ -36,24 +36,23 @@ module.exports = {
     }
   },
   read: function(){
-    while(locked){}
+    while(fs.existsSync('./list/buckets.lock')){}
     this.lock();
     var result = jsonfile.readFileSync('./list/buckets.json');
     return new Promise((resolve) => resolve(result));
   },
   write: function(data){
-    while(locked){}
+    while(fs.existsSync('./list/buckets.lock')){}
     this.lock();
     var result = jsonfile.writeFileSync('./list/buckets.json', data,{spaces:2,EOL: '\r\n'});
     return new Promise((resolve) => resolve(result));
   },
   lock: function(){
-    locked = true;
-    setTimeout(function(){
-      locked = false;
-    }, 5000);
+    fs.writeFileSync('./list/buckets.lock', "");
   },
   unlock: function(){
-    locked = false;
+    if(fs.existsSync('./list/buckets.lock')){
+      fs.unlinkSync('./list/buckets.lock');
+    }
   }
 }

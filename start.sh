@@ -5,6 +5,7 @@ _term(){
   pkill node
   rm configActive.json
   rm tmp/* &>/dev/null
+  rm list/buckets.lock &>/dev/null
   echo "Done"
 }
 

@@ -125,9 +125,9 @@ module.exports = {
                     continue;
                   }
                   bucketInfo[i].played = false;
+                  logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
                   playlist.unlock();
                   playlist.write(buckets).then((result) => {
-                    logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
                     playlist.unlock();
                   });
                 }
