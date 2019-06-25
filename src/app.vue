@@ -509,10 +509,12 @@
               this.availableBucket = -1;
               this.uploading = false;
             });
-            this.printMessage(res.message);
+            var msg = res.message;
+            this.printMessage(msg);
           }
         ).catch((err) => {
-          this.printMessage(err.response.data);
+          var msg = err.response.data;
+          this.printMessage(msg);
           this.uploading = false;
         });
         },
@@ -548,7 +550,8 @@
               "Content-Type" : "multipart/form-data"
             }
           }).then((res) => {
-            this.printfMessage(res.message);
+            var msg = res.message;
+            this.printfMessage(msg);
             this.$nextTick(() => {
               this.availableBucket = -1;
               this.fCanUpload = false;
@@ -556,7 +559,8 @@
               this.uploading = false;
             });
           }).catch((err) => {
-            this.printfMessage(err.response.data);
+            var msg = err.response.data;
+            this.printfMessage(msg);
             this.uploading = false;
           });
         },
