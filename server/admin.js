@@ -17,7 +17,7 @@ module.exports={
 
   passMatch: function(password){
     var hash = crypto.createHash('sha256');
-    hash.update(password);
+    hash.update(password+config.salt);
     return hash.digest('hex') === config.password;
   },
 
@@ -44,7 +44,7 @@ module.exports={
   changeConfig: function(newConfig){
     logger.log("The config has been changed " + newConfig);
     var conf = jsonfile.readFileSync('configActive.json');
-    jsonfile.writeFileSync('configActive.json', config);
     config = newConfig;
+    jsonfile.writeFileSync('configActive.json', config);
   }
 }
