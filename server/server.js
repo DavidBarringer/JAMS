@@ -49,7 +49,7 @@ var express = require('express'),
       });
 
       app.get('/download', function(req, res){
-        res.send("Feature currently unavialable");
+        res.send("Feature currently unavailable");
         //var id = req.query.id;
         //dl.download(id, res);
       });
