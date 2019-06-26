@@ -58,7 +58,7 @@ function play(vid){
     stoptime = Math.min(vid.endTime, maxLength);
   if(vid.image){
     const vlcImg = child.spawn('vlc', ['tmp/' + vid.image, '-f', '--no-vide-title-show', '--play-and-exit', 'image-duration', 'stoptime']);
-    const vlcVid = child.spawnSync('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time', 'stoptime', '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
+    const vlcVid = child.spawnSync('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
     //exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit " +
     //"--no-qt-fs-controller --image-duration " + stoptime +
     //(vid.startTime ? ' --start-time ' + vid.startTime :''), {windowsHide: true});
@@ -67,7 +67,7 @@ function play(vid){
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
-      const vlcVid = child.spawnSync('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time', 'stoptime', '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'inherit'});
+      const vlcVid = child.spawnSync('vlc', [ '-f', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'inherit'});
       //exec.execSync("vlc --demux=avformat,none --codec=avcodec,all -f --no-video-title-show --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
     }
     else{
