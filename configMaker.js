@@ -8,6 +8,7 @@ var password = "";
 var crypto = require('crypto');
 var cont = false;
 var salt = new Date();
+salt = salt.getTime();
 while(!cont){
   var answer = rlSync.question("Port to run server on (Default: 8080): ");
   if(!answer)
