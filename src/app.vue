@@ -96,7 +96,7 @@
               <tr v-bind:class="{finished: song.played == 'done', playing: song.played == 'playing'}">
                 <td class="title">
                   <a v-if="(song.url)" v-bind:href="song.url">{{ song.title }}</a>
-                  <a v-else v-on:click="download(song.path)">{{ song.title }}</a>
+                  <a v-else v-on:click="download(song.title,song.dlId)">{{ song.title }}</a>
                 </td>
                 <td class="name" v-bind:title="getAlias(song.ip)">{{ getAlias(song.ip) }}</td>
                 <td class="adminButton">
@@ -240,7 +240,7 @@
         fToFillDuration: 0,
         file: "",
         fImage: "",
-        filepath: "",
+        loc: 0,
         clearFile: false
       },
 
@@ -389,11 +389,11 @@
           this.file = this.$refs.uploadFile.files[0];
           if(this.fNewVideoName){
             this.axios.post("/fileCancel", {
-              filepath: this.filepath
+              loc: this.loc
             }).then((res)=>{
               this.fMessage = "";
               this.file = "";
-              this.filepath = "";
+              this.loc = 0;
               this.fNewVideoName = "";
               this.fStartTime = "";
               this.fSTime = 0;
@@ -419,7 +419,7 @@
             this.fEndTime = this.timeToString(this.fNewVideoDuration);
             var a = this.fEndTime.split(':');
             this.fETime = a.reduce((acc, time) => (60 * acc) + +time);
-            this.filepath = response.data.filepath;
+            this.loc = response.data.loc;
             this.findAvailableBucket();
           }).catch((err) => {
             this.fMessage = err.response.data;
@@ -522,7 +522,7 @@
           this.uploading = true;
           var formData = new FormData();
           formData.set('type', 'file');
-          formData.set('filepath', this.filepath);
+          formData.set('loc', this.loc);
           formData.set('filename', this.fNewVideoName);
           formData.set('duration', this.fNewVideoDuration);
           formData.set('startTime', (this.fStartCheck ? this.fSTime : ''));
@@ -533,7 +533,7 @@
           }
           this.file = "";
           this.clearFile = true;
-          this.filepath = "";
+          this.loc = "";
           this.fNewVideoName = "";
           this.fStartTime = "";
           this.fSTime = 0;
@@ -579,19 +579,19 @@
           }, 1000);
         },
 
-        download(filepath){
+        download(title, dlId){
           this.axios({
             url: '/download',
             method: 'GET',
             params:{
-              path: filepath
+              id: dlId
             },
             responseType: 'blob'
           }).then((response) => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', filepath.split("/")[2]);
+            link.setAttribute('download', title);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

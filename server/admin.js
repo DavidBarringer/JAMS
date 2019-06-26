@@ -30,12 +30,20 @@ module.exports={
     admins.splice(admins.indexOf(ip),1)
   },
 
+  getPort: function(){
+    var conf = jsonfile.readFileSync('configActive.json');
+    return conf.port;
+  },
+
   getConfig: function(){
-    return jsonfile.readFileSync('configActive.json');
+    var conf = jsonfile.readFileSync('configActive.json');
+    var res = {bucketNum:conf.bucketNum, bucketVideos:conf.bucketVideos, bucketLength:conf.bucketLength};
+    return res;
   },
 
   changeConfig: function(newConfig){
     logger.log("The config has been changed " + newConfig);
+    var conf = jsonfile.readFileSync('configActive.json');
     jsonfile.writeFileSync('configActive.json', config);
     config = newConfig;
   }

@@ -1,5 +1,5 @@
 var fs = require('fs');
-var exec = require('child_process');
+var child = require('child_process');
 var playlist = require('./playlist.js');
 var admin = require('../server/admin.js');
 var logger = require('../log/logger.js');
@@ -45,6 +45,10 @@ setInterval(function(){
 function play(vid){
   var maxLength = admin.getConfig().bucketLength;
   var stoptime = maxLength;
+  var startTime = 0;
+  if(vid.startTime){
+      startTime = vid.startTime;
+  }
   if(vid.toFillTime){
     stoptime = vid.toFillTime;
     if(vid.startTime)
@@ -53,14 +57,23 @@ function play(vid){
   else if(vid.endTime)
     stoptime = Math.min(vid.endTime, maxLength);
   if(vid.image){
-    exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit " +
-    "--no-qt-fs-controller --image-duration " + stoptime +
-    (vid.startTime ? ' --start-time ' + vid.startTime :''), {windowsHide: true});
-    exec.execSync("vlc --demux=avformat,none --codec=avcodec,all --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename, {windowsHide:true});
-    exec.execSync('pkill vlc');
+    const vlcImg = child.spawn('vlc', ['tmp/' + vid.image, '-f', '--no-vide-title-show', '--play-and-exit', 'image-duration', 'stoptime']);
+    const vlcVid = child.spawnSync('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time', 'stoptime', '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
+    //exec.exec("vlc tmp/" + vid.image + " -f --no-video-title-show --play-and-exit " +
+    //"--no-qt-fs-controller --image-duration " + stoptime +
+    //(vid.startTime ? ' --start-time ' + vid.startTime :''), {windowsHide: true});
+    //exec.execSync("vlc --demux=avformat,none --codec=avcodec,all --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename, {windowsHide:true});
+    const kill = child.spawn('pkill', ['vlc']);
   }
-  else
-    exec.execSync("vlc --demux=avformat,none --codec=avcodec,all -f --no-video-title-show --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
+  else{
+    if(fs.existsSync("tmp/" + vid.filename)){
+      const vlcVid = child.spawnSync('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time', 'stoptime', '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'inherit'});
+      //exec.execSync("vlc --demux=avformat,none --codec=avcodec,all -f --no-video-title-show --play-and-exit --stop-time " + stoptime + " --global-key-quit Esc " + (vid.startTime ? '--start-time ' + vid.startTime :'') + " --no-qt-fs-controller tmp/" + vid.filename);
+    }
+    else{
+      console.log("Unable to play " + vid.filename);
+    }
+  }
   playlist.read().then((buckets) => {
     currentBucket = buckets[0];
     vid = currentBucket[i];

@@ -6,6 +6,7 @@ var admin = require('./admin.js');
 var logger = require('../log/logger.js');
 var formidable = require('formidable');
 var ffmpeg = require('fluent-ffmpeg');
+var dlId = 0;
 
 var fileTmp = [];
 
@@ -59,6 +60,7 @@ module.exports = {
     var obj;
     var url = data.url;
     var startTime = data.startTime;
+
     var endTime = data.endTime;
     var toFillTime = data.toFillTime;
     var imagePath = "";
@@ -82,7 +84,6 @@ module.exports = {
       else{
         var title = info.title;
         filename = info._filename;
-        console.log(info.duration);
         playlist.read().then((buckets) => {
           var sTime;
           if(data.toFillTime)
@@ -101,7 +102,6 @@ module.exports = {
           //Sets time to max vid length if it is over
           if(sTime > maxDuration)
             sTime = maxDuration;
-          console.log(sTime);
           availableBucket(buckets,ip,sTime).then((result) => {
             var vid = ytdl(url);
             var hash = crypto.createHash('sha256');
@@ -135,7 +135,6 @@ module.exports = {
               });
             });
           }).catch((e) => {
-            console.log(e);
             if(imagePath){
               fs.unlinkSync("./tmp/" + imagePath);
             }
@@ -243,14 +242,13 @@ module.exports = {
         var duration = "" + metadata.format.duration;
         duration = duration.split(".")[0];
         fileTmp.push({path: file.path, ip: req.ip});
-        res.send({name: givenName, duration: duration, filepath: filename});
+        res.send({name: givenName, duration: duration, loc:fileTmp.length-1});
       });
     });
   },
 
   fileSave: function(form, data, files, ip, res){
     var maxDuration = admin.getConfig().bucketLength;
-    console.log(data);
     var startTime = data.startTime;
     var endTime = data.endTime;
     var toFillTime = data.toFillTime;
@@ -264,12 +262,9 @@ module.exports = {
       fs.unlinkSync(file.path);
     }
     var path;
-    for(var i = 0; i < fileTmp.length; i++){
-      if(fileTmp[i].path.includes(data.filepath) && fileTmp[i].ip == ip){
-        path = fileTmp[i].path;
-        fileTmp.splice(i, 1);
-        break;
-      }
+    if(fileTmp[data.loc].ip == ip){
+      path = fileTmp[data.loc].path;
+      fileTmp.splice(data.loc, 1);
     }
     playlist.read().then((buckets) => {
       var sTime;
@@ -286,7 +281,7 @@ module.exports = {
       availableBucket(buckets, ip, sTime).then((result)=>{
         var bucket = result;
         res.send("Video uploaded");
-        var obj = {ip: ip, title: data.filename, path: "./tmp/" + path.split("/")[2], duration: sTime, startTime: startTime, endTime: endTime, toFillTime: toFillTime, filename: path.split("/")[2], played: false, image: imagePath};
+        var obj = {ip: ip, title: data.filename, path: "./tmp/" + path.split("/")[2], duration: sTime, startTime: startTime, endTime: endTime, toFillTime: toFillTime, filename: path.split("/")[2], played: false, image: imagePath, dlId:dlId++};
         buckets[bucket].push(obj);
         playlist.unlock();
         playlist.write(buckets).then((result) => {
@@ -301,12 +296,10 @@ module.exports = {
     });
   },
 
-  fileCancel: function(filepath, ip ,res){
-    for(var i = 0; i < fileTmp.length; i++){
-      if(fileTmp[i].path.includes(filepath) && fileTmp[i].ip == ip){
-        fs.unlinkSync(fileTmp[i].path);
-        fileTmp.splice(i, 1);
-      }
+  fileCancel: function(loc, ip ,res){
+    if(fileTmp[loc].ip == ip){
+      fs.unlinkSync(fileTmp[loc].path);
+      fileTmp.splice(loc, 1);
     }
     res.send("Complete");
   }

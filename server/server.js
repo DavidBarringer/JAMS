@@ -20,7 +20,7 @@ var express = require('express'),
 
       const template = fs.readFileSync('./src/index.html');
       const app = express();
-      var port = admin.getConfig().port;
+      var port = admin.getPort();
       app.enable('trust proxy');
       app.set('trust proxy', 'loopback');
       app.use(express.static("dist"))
@@ -49,8 +49,9 @@ var express = require('express'),
       });
 
       app.get('/download', function(req, res){
-        var filepath = req.query.path;
-        dl.download(filepath, res);
+        res.send("Feature currently unavialable");
+        //var id = req.query.id;
+        //dl.download(id, res);
       });
 
       app.post('/remove', function(req,res){
@@ -59,8 +60,13 @@ var express = require('express'),
       });
 
       app.post('/kill', function(req,res){
-        exec.execSync('pkill vlc');
-        res.send("Done");
+        if(admin.adminSession(req.body.ip)){
+          exec.execSync('pkill vlc');
+          res.send("Done");
+        }
+        else{
+          res.send("You do not have permission to perform this command.");
+        }
       });
 
       app.post('/upload', function(req, res){
@@ -130,7 +136,7 @@ var express = require('express'),
       });
 
       app.post('/fileCancel', function(req, res){
-        bucketManager.fileCancel(req.body.filepath, req.ip, res);
+        bucketManager.fileCancel(req.body.loc, req.ip, res);
       });
 
       var server = app.listen(port, function(){

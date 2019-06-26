@@ -7,6 +7,7 @@ var bucketLength = 547;
 var password = "";
 var crypto = require('crypto');
 var cont = false;
+var salt = new Date();
 while(!cont){
   var answer = rlSync.question("Port to run server on (Default: 8080): ");
   if(!answer)
@@ -73,7 +74,7 @@ while(!cont){
     });
     if(confirm === answer){
       var hash = crypto.createHash('sha256');
-      hash.update(answer);
+      hash.update(answer+salt);
       password = hash.digest('hex');
       cont = true;
     }
@@ -87,7 +88,8 @@ var config = {
   bucketNum: bucketNum,
   bucketVideos: bucketVideos,
   bucketLength: bucketLength,
-  password: password
+  password: password,
+  salt: salt
 };
 jsonfile.writeFileSync('config.json', config);
 console.log("Config has been written");
