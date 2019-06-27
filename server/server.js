@@ -13,6 +13,7 @@ var logger = require('../log/logger.js');
 var dl = require('./download.js');
 var formidable = require('formidable');
 var exec = require('child_process');
+const player = exec.fork(`${__dirname}/../player/player.js`, {detached: true});
 var express = require('express'),
       path = require('path'),
       cors = require('cors');
@@ -49,19 +50,22 @@ var express = require('express'),
       });
 
       app.get('/download', function(req, res){
-        res.send("Feature currently unavialable");
+        res.send("Feature currently unavailable");
         //var id = req.query.id;
         //dl.download(id, res);
       });
 
       app.post('/remove', function(req,res){
-        bucketManager.rm(req.body.index,req.body.sIndex,req.body.ip);
-        res.send("Done");
+        if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
+          bucketManager.rm(req.body.index,req.body.sIndex,req.body.ip);
+          res.send("Done");
+        }
       });
 
       app.post('/kill', function(req,res){
-        if(admin.adminSession(req.body.ip)){
-          exec.execSync('pkill vlc');
+        console.log(req.body.songIp);
+        if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
+          player.send("KILL");
           res.send("Done");
         }
         else{

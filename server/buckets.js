@@ -262,6 +262,9 @@ module.exports = {
       fs.unlinkSync(file.path);
     }
     var path;
+    if(!fileTmp[data.loc]){
+      return;
+    }
     if(fileTmp[data.loc].ip == ip){
       path = fileTmp[data.loc].path;
       fileTmp.splice(data.loc, 1);

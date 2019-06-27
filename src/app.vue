@@ -393,7 +393,7 @@
             }).then((res)=>{
               this.fMessage = "";
               this.file = "";
-              this.loc = 0;
+              this.loc = -1;
               this.fNewVideoName = "";
               this.fStartTime = "";
               this.fSTime = 0;
@@ -533,7 +533,7 @@
           }
           this.file = "";
           this.clearFile = true;
-          this.loc = "";
+          this.loc = -1;
           this.fNewVideoName = "";
           this.fStartTime = "";
           this.fSTime = 0;
@@ -626,8 +626,8 @@
           }).then((res)=>{});
         },
 
-        killSong(){
-          var result = this.axios.post("/kill").then((res)=>{});
+        killSong(x,y,songIp){
+          var result = this.axios.post("/kill", {songIp:songIp}).then((res)=>{});
         },
 
         bucketTime(bucket){

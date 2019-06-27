@@ -3,6 +3,7 @@ _term(){
   echo
   echo "Shutting down server"
   pkill node
+  pkill vlc
   rm configActive.json
   rm tmp/* &>/dev/null
   rm list/buckets.lock &>/dev/null
@@ -13,6 +14,5 @@ trap _term SIGINT SIGTERM
 
 echo "Starting server, may God have mercy on our souls."
 npm start &>/dev/null
-node server/server.js &
 echo "Server is now running, memes incoming."
-node player/player.js
+node server/server.js
