@@ -66,12 +66,12 @@ async function play(vid){
   if(vid.image){
     console.log("F");
     const vlcImg = child.spawn('vlc', ['tmp/' + vid.image, '-f', '--no-video-title-show', '--play-and-exit', 'image-duration='+stoptime, '--no-qt-fs-controller'], {stdio: 'inherit'});
-    const vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
+    const vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
     exitCheck(vlcVid,vlcImg);
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
-      const vlcVid = child.spawn('vlc', [ '-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time', 'startTime', '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'inherit'});
+      const vlcVid = child.spawn('vlc', [ '-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'inherit'});
       exitCheck(vlcVid, false);
     }
     else{

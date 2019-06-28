@@ -24,7 +24,7 @@ var express = require('express'),
       var port = admin.getPort();
       app.enable('trust proxy');
       app.set('trust proxy', 'loopback');
-      app.use(express.static("dist"))
+      app.use(express.static("dist"));
       app.use(function(req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

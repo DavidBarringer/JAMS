@@ -17,10 +17,6 @@ module.exports={
     if(pth){
       var file = fs.readFileSync(pth);
       res.send(file);
-      // var file = path.dirname(pth)
-      // res.sendFile(pth.slice(pth.lastIndexOf("/")),{
-      //   root:file
-      // });
     }
     else{
       res.status(404).send("Cannot download file");
