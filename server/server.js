@@ -50,9 +50,8 @@ var express = require('express'),
       });
 
       app.get('/download', function(req, res){
-        res.send("Feature currently unavailable");
-        //var id = req.query.id;
-        //dl.download(id, res);
+        var id = req.query.id;
+        dl.download(id, res);
       });
 
       app.post('/remove', function(req,res){
@@ -63,7 +62,6 @@ var express = require('express'),
       });
 
       app.post('/kill', function(req,res){
-        console.log(req.body.songIp);
         if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
           player.send("KILL");
           res.send("Done");

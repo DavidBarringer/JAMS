@@ -76,75 +76,80 @@ module.exports = {
       res.status(400).send("Cannot upload a playlist");
       return;
     }
-    ytdl.getInfo(url, function(err,info){
-      if(err){
-        logger.warn("Video upload failed: " + JSON.stringify(err));
-        res.status(400).send("Cannot upload, check the url and try again");
-      }
-      else{
-        var title = info.title;
-        filename = info._filename;
-        playlist.read().then((buckets) => {
-          var sTime;
-          if(data.toFillTime)
-            sTime = toFillTime;
-          else if (startTime && endTime)
-            sTime = endTime-startTime;
-          else if (endTime)
-            sTime = endTime;
-          else {
-            //Function that takes time of the form hh:mm:ss and converts it to seconds
-            var a = info.duration.split(':');
-            sTime = a.reduce((acc, time) => (60 * acc) + +time);
-            if(startTime)
-              sTime -= startTime;
-          }
-          //Sets time to max vid length if it is over
-          if(sTime > maxDuration)
-            sTime = maxDuration;
-          availableBucket(buckets,ip,sTime).then((result) => {
-            var vid = ytdl(url);
-            var hash = crypto.createHash('sha256');
-            hash.update(filename + Date.now());
-            filename = hash.digest('hex');
-            vid.pipe(fs.createWriteStream('tmp/'+ filename +'.mp4'));
-            bucket = result;
-            obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
-            buckets[bucket].push(obj);
-            playlist.unlock();
-            playlist.write(buckets).then((result) => {
-              playlist.unlock();
-              logger.log("Video uploaded via url" + JSON.stringify(obj));
-              res.send("Video uploaded");
-            });
-            vid.on('end', function(){
-              playlist.read().then((buckets) => {
-                bucketInfo = buckets[bucket];
-                for(var i=0; i<bucketInfo.length; i++){
-                  if(bucketInfo[i].filename != obj.filename){
-                    continue;
-                  }
-                  bucketInfo[i].played = false;
-                  logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
-                  playlist.unlock();
-                  playlist.write(buckets).then((result) => {
-                    playlist.unlock();
-                  });
-                }
-                playlist.unlock();
-              });
-            });
-          }).catch((e) => {
-            if(imagePath){
-              fs.unlinkSync("./tmp/" + imagePath);
+    try{
+      ytdl.getInfo(url, function(err,info){
+        if(err){
+          logger.warn("Video upload failed: " + JSON.stringify(err));
+          res.status(400).send("Cannot upload, check the url and try again");
+        }
+        else{
+          var title = info.title;
+          filename = info._filename;
+          playlist.read().then((buckets) => {
+            var sTime;
+            if(data.toFillTime)
+              sTime = toFillTime;
+            else if (startTime && endTime)
+              sTime = endTime-startTime;
+            else if (endTime)
+              sTime = endTime;
+            else {
+              //Function that takes time of the form hh:mm:ss and converts it to seconds
+              var a = info.duration.split(':');
+              sTime = a.reduce((acc, time) => (60 * acc) + +time);
+              if(startTime)
+                sTime -= startTime;
             }
-            logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
-            res.status(400).send("Cannot upload video -- You don't enough bucket space");
-            playlist.unlock();
+            //Sets time to max vid length if it is over
+            if(sTime > maxDuration)
+              sTime = maxDuration;
+            availableBucket(buckets,ip,sTime).then((result) => {
+              var vid = ytdl(url);
+              var hash = crypto.createHash('sha256');
+              hash.update(filename + Date.now());
+              filename = hash.digest('hex');
+              vid.pipe(fs.createWriteStream('tmp/'+ filename +'.mp4'));
+              bucket = result;
+              obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
+              buckets[bucket].push(obj);
+              playlist.unlock();
+              playlist.write(buckets).then((result) => {
+                playlist.unlock();
+                logger.log("Video uploaded via url" + JSON.stringify(obj));
+                res.send("Video uploaded");
+              });
+              vid.on('end', function(){
+                playlist.read().then((buckets) => {
+                  bucketInfo = buckets[bucket];
+                  for(var i=0; i<bucketInfo.length; i++){
+                    if(bucketInfo[i].filename != obj.filename){
+                      continue;
+                    }
+                    bucketInfo[i].played = false;
+                    logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
+                    playlist.unlock();
+                    playlist.write(buckets).then((result) => {
+                      playlist.unlock();
+                    });
+                  }
+                  playlist.unlock();
+                });
+              });
+            }).catch((e) => {
+              if(imagePath){
+                fs.unlinkSync("./tmp/" + imagePath);
+              }
+              logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
+              res.status(400).send("Cannot upload video -- You don't enough bucket space");
+              playlist.unlock();
+            });
           });
-        });
-      }
-    });
+        }
+      });
+    }
+    catch(e){
+      res.status(400).send("Cannot upload video, youtube-dl has encountered an error");
+    }
   },
 
   check: function(url, res){
@@ -224,6 +229,7 @@ module.exports = {
 
   fileCheck: function(req, ip, res){
     var form = new formidable.IncomingForm();
+    form.maxFileSize = 500*1024*1024;
     var filename;
     var givenName;
 
@@ -244,6 +250,11 @@ module.exports = {
         fileTmp.push({path: file.path, ip: req.ip});
         res.send({name: givenName, duration: duration, loc:fileTmp.length-1});
       });
+    });
+
+    form.on('error', function(error){
+      res.status(403).send('The file cannot be uploaded');
+      console.log(error);
     });
   },
 
