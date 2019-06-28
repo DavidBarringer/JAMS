@@ -233,6 +233,11 @@ module.exports = {
     var filename;
     var givenName;
 
+    form.on('error', function(err){
+      res.status(403).send('The file cannot be uploaded');
+      logger.log(ip + " tried to upload a file, but it could not be downloaded: " + err);
+    });
+
     form.parse(req);
 
     form.on('fileBegin', function (name, file){
@@ -250,11 +255,6 @@ module.exports = {
         fileTmp.push({path: file.path, ip: req.ip});
         res.send({name: givenName, duration: duration, loc:fileTmp.length-1});
       });
-    });
-
-    form.on('error', function(error){
-      res.status(403).send('The file cannot be uploaded');
-      console.log(error);
     });
   },
 
