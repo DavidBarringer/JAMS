@@ -438,10 +438,14 @@
           this.fImage = this.$refs.fImage.files[0];
         },
         findAvailableBucket(){
+          if(this.newVideoDuration === 0){
+            this.availableBucket = -1;
+            this.canUpload = true;
+          }
           var duration;
-          if(this.activeTab == 0)
+          if(this.activeTab === 0)
             duration = this.eTime - this.sTime;
-          if(this.activeTab == 1)
+          if(this.activeTab === 1)
             duration = this.fETime - this.fSTime;
           if(duration > this.bucketLength)
             duration = this.bucketLength;

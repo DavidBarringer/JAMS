@@ -3,17 +3,16 @@
 */
 
 var fs = require('fs');
-var playlist = require('../player/playlist.js');
-playlist.new();
 var exec = require('child_process');
-var bucketManager = require('./buckets.js');
+var dlManager = require('./buckets.js');
+var bucketManager = require('./bucketManager.js');
+dlManager.setManager(bucketManager);
 var admin = require('./admin.js');
 var alias = require('./alias.js');
 var logger = require('../log/logger.js');
 var dl = require('./download.js');
 var formidable = require('formidable');
 var exec = require('child_process');
-const player = exec.fork(`${__dirname}/../player/player.js`, {detached: true});
 var express = require('express'),
       path = require('path'),
       cors = require('cors');
@@ -40,7 +39,8 @@ var express = require('express'),
         var ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         var adminSession = admin.adminSession(ip);
         var config = admin.getConfig();
-        var buckets = await bucketManager.get();
+        var buckets = await bucketManager.getBuckets("SERVER");
+        bucketManager.unlock("SERVER");
         res.send({buckets:buckets,ip:ip,adminSession:adminSession,config:config});
       });
 
@@ -56,7 +56,7 @@ var express = require('express'),
 
       app.post('/remove', function(req,res){
         if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
-          bucketManager.rm(req.body.index,req.body.sIndex,req.body.ip);
+          dlManager.rm(req.body.index,req.body.sIndex,req.body.ip);
           res.send("Done");
         }
       });
@@ -76,9 +76,9 @@ var express = require('express'),
         var ip = req.ip || req.headers['x-forwarded-for'];
         form.parse(req,function (err, data, files){
           if(data.type == "url")
-            bucketManager.dl(form, data, files, ip, res);
+            dlManager.dl(form, data, files, ip, res);
           else if(data.type == "file"){
-            bucketManager.fileSave(form, data, files, ip, res);
+            dlManager.fileSave(form, data, files, ip, res);
           }
           else{
             res.status(404).send("Unknown data type");
@@ -88,7 +88,7 @@ var express = require('express'),
 
       app.post('/check', function(req, res){
         var url = req.body.url;
-        bucketManager.check(url, res);
+        dlManager.check(url, res);
       })
 
       app.post('/admin', function(req, res){
@@ -134,11 +134,11 @@ var express = require('express'),
       });
 
       app.post('/fileCheck', function(req, res){
-        bucketManager.fileCheck(req, req.ip, res);
+        dlManager.fileCheck(req, req.ip, res);
       });
 
       app.post('/fileCancel', function(req, res){
-        bucketManager.fileCancel(req.body.loc, req.ip, res);
+        dlManager.fileCancel(req.body.loc, req.ip, res);
       });
 
       var server = app.listen(port, function(){
