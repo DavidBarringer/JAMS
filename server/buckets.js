@@ -203,6 +203,8 @@ module.exports = {
     }
     var jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
     jsondump.stderr.on('data', (err) => {
+      console.log(`${err}`);
+      logger.log("A video upload was attmpted: " + `${err}`);
       res.status(400).send("Cannot upload, check the url and try again");
     });
     jsondump.stdout.on('data', (info) => {
