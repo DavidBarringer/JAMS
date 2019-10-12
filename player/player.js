@@ -47,10 +47,6 @@ setInterval(function(){
       }
       var vid = currentBucket[i];
       if(!vid.played){
-        process.send({cmd:"LOCK"});
-        vid.played = "playing";
-        process.send({cmd:"UPDATE", buckets:buckets});
-        process.send({cmd:"UNLOCK"});
         console.log("Playing: " + vid.title);
         logger.log("Playing video " + vid);
         playing = true;
@@ -81,6 +77,10 @@ async function play(vid){
   }
   else if(vid.endTime)
     stoptime = Math.min(vid.endTime, maxLength);
+  process.send({cmd:"LOCK"});
+  vid.played = Date.now();
+  process.send({cmd:"UPDATE", buckets:buckets});
+  process.send({cmd:"UNLOCK"});
   if(vid.image){
     const vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
     const vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});

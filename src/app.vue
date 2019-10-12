@@ -93,7 +93,7 @@
           <tbody>
             <template v-for="(song,sIndex) in bucket">
               <tr class="spacer"></tr>
-              <tr v-bind:class="{finished: song.played == 'done', playing: song.played == 'playing'}">
+              <tr v-bind:class="{finished: song.played == 'done', playing: isPlaying(song.played)}">
                 <td class="title">
                   <a v-if="(song.url)" v-bind:href="song.url">{{ song.title }}</a>
                   <a v-else v-on:click="download(song.title,song.dlId)">{{ song.title }}</a>
@@ -101,7 +101,12 @@
                 <td class="name" v-bind:title="getAlias(song.ip)">{{ getAlias(song.ip) }}</td>
                 <td class="adminButton">
                   <button v-if="(song.ip==ip || adminSession==true) && (!song.played)" v-on:click="removeSong(index,sIndex,song.ip)" class="button is-small is-right">Remove</button>
-                  <button v-else-if="(song.ip==ip || adminSession==true) && (song.played == 'playing')" v-on:click="killSong(index,sIndex,song.ip)" class="button is-small is-right">Kill</button>
+                  <button v-else-if="(song.ip==ip || adminSession==true) && (isPlaying(song.played))" v-on:click="killSong(index,sIndex,song.ip)" class="button is-small is-right">Kill</button>
+                </td>
+              </tr>
+              <tr v-if="(isPlaying(song.played))" style="height:0.5rem">
+                <td colspan="3">
+                  <div v-bind:style="{width:Math.min(100,(currTime-song.played)/(song.duration*10))+'%'}" style="height:0.25rem; background-color:yellow;"></div>
                 </td>
               </tr>
             </template>
@@ -187,6 +192,7 @@
     export default{
       data:{
         activeTab: 0,
+        currTime: Date.now(),
 
         status: "",
         items: [],
@@ -317,6 +323,9 @@
         x.debouncedCheckfETime = x.$_.debounce(this.checkfETime, 1000);
         x.fetchItems();
         setInterval(function(){
+          x.currTime += 500;
+        }, 500);
+        setInterval(function(){
           x.fetchItems();
         }, 2000);
       },
@@ -333,6 +342,23 @@
           }
           else{
             this.availableBucket = -1;
+          }
+        },
+
+        //Returns if a song is Playing
+        isPlaying(check){
+          switch (check){
+            case 'downloading':
+              return 0;
+              break;
+            case 'done':
+              return 0;
+              break;
+            case false:
+              return 0;
+              break;
+            default:
+              return 1;
           }
         },
 
@@ -573,14 +599,14 @@
           this.message = message;
           setTimeout(function(){
             this.message = "";
-          }, 1000);
+          }, 10000);
         },
 
         printfMessage(message){
           this.fMessage = message;
           setTimeout(function(){
             this.fMessage = "";
-          }, 1000);
+          }, 10000);
         },
 
         download(title, dlId){

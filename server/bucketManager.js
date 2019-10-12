@@ -71,5 +71,9 @@ module.exports = {
       lock = false;
       player.send({cmd: "UNLOCK"});
     }
+  },
+
+  kill: function(){
+    player.send({cmd:"KILL"});
   }
 }

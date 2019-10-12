@@ -63,7 +63,7 @@ var express = require('express'),
 
       app.post('/kill', function(req,res){
         if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
-          player.send("KILL");
+          bucketManger.kill();
           res.send("Done");
         }
         else{
