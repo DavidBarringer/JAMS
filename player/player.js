@@ -31,7 +31,9 @@ process.on('message', (msg) => {
 
 setInterval(function(){
   if(!playing){
-    while(lock){}
+    while(lock){
+      setTimeout(function(){},1000);
+    }
     currentBucket = buckets[0];
     if(currentBucket.length != 0){
       if(i == currentBucket.length){

@@ -81,118 +81,124 @@ module.exports = {
       return;
     }
     url = url.split("&")[0];
+    var jsoninfo = "";
     const jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
-    jsondump.stderr.on('data', (err) => {
-      logger.warn("Video upload failed: " + `${err}`);
-      res.status(400).send("Cannot upload video, check the url and try again");
-    });
     jsondump.stdout.on('data', async function (info){
-      info = JSON.parse(`${info}`);
-      var title = info.title;
-      filename = info._filename;
-      var buckets = await bucketManager.getBuckets("DL");
-      var sTime;
-      var hash = crypto.createHash('sha256');
-      hash.update(filename + Date.now());
-      filename = hash.digest('hex');
-      if(info.duration){
-        if(data.toFillTime)
-          sTime = toFillTime;
-        else if (startTime && endTime)
-          sTime = endTime-startTime;
-        else if (endTime)
-          sTime = endTime;
-        else {
-          sTime = info.duration;
-          if(startTime)
-            sTime -= startTime;
-        }
-        //Sets time to max vid length if it is over
-        if(sTime > maxDuration)
-          sTime = maxDuration;
-        availableBucket(buckets,ip,sTime).then((bucket) => {
-          const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
-          obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
-          buckets[bucket].push(obj);
-          bucketManager.writeBuckets("DL", buckets);
-          logger.log("Video uploaded via url" + JSON.stringify(obj));
-          res.send("Video uploaded");
-          ytdl.on('close', async function (code){
-            if(code !== 0){
-              logger.err("An error occured while trying to download the video: " + url);
-              res.status(400).send("An error occured while downloading the video");
-              if(imagePath){
-                fs.unlinkSync("./tmp/" + imagePath);
-              }
-              if(fs.existsSync("./tmp/" + filename + ".mp4")){
-                fs.unlinkSync("./tmp/" + filenaem + ".mp4");
-              }
-              bucketManager.unlock("DL");
-            }
-            else{
-              var buckets = await bucketManager.getBuckets("DL");
-              bucketInfo = buckets[bucket];
-              for(var i=0; i<bucketInfo.length; i++){
-                if(bucketInfo[i].filename != obj.filename){
-                  continue;
-                }
-                bucketInfo[i].played = false;
-                logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
-                bucketManager.writeBuckets("DL", buckets);
-              }
-              bucketManager.unlock("DL");
-            }
-          });
-        }).catch((e) => {
-          if(imagePath){
-            fs.unlinkSync("./tmp/" + imagePath);
-          }
-          logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
-          res.status(400).send("Cannot upload video -- You don't enough bucket space");
-          bucketManager.unlock("DL");
-        });
+      jsoninfo = `${info}`;
+    });
+    jsondump.on('close', async function(code){
+      if(code !== 0){
+        logger.warn("Video upload failed: " + `${err}`);
+        res.status(400).send("Cannot upload video, check the url and try again");
       }
       else{
-        bucketManager.unlock("DL");
-        const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
-        ytdl.on('close', async function(code){
-          if(code !== 0){
-            logger.error("An error occured while downloading the video: " + url);
-            if(imagePath){
-              fs.unlinkSync('./tmp/' + imagePath);
-            }
-            if(fs.existsSync('./tmp/' + filename + '.mp4')){
-              fs.unlinkSync('./tmp/' + filename + '.mp4');
-            }
+        var info = JSON.parse(jsoninfo);
+        var title = info.title;
+        filename = info._filename;
+        var buckets = await bucketManager.getBuckets("DL");
+        var sTime;
+        var hash = crypto.createHash('sha256');
+        hash.update(filename + Date.now());
+        filename = hash.digest('hex');
+        if(info.duration){
+          if(data.toFillTime)
+          sTime = toFillTime;
+          else if (startTime && endTime)
+          sTime = endTime-startTime;
+          else if (endTime)
+          sTime = endTime;
+          else {
+            sTime = info.duration;
+            if(startTime)
+            sTime -= startTime;
           }
-          else{
-            buckets = await bucketManager.getBuckets("DL");
-            var duration;
-            ffmpeg.ffprobe('./tmp/' + filename + '.mp4', function (err, metadata){
-              duration = "" + metadata.format.duration;
-              duration = duration.split(".")[0];
-              if(data.toFillTime)
-                sTime = toFillTime;
-              else if (startTime && endTime)
-                sTime = endTime-startTime;
-              else if (endTime)
-                sTime = endTime;
-              else {
-                sTime = +duration;
-                if(startTime)
-                  sTime -= startTime;
+          //Sets time to max vid length if it is over
+          if(sTime > maxDuration)
+          sTime = maxDuration;
+          availableBucket(buckets,ip,sTime).then((bucket) => {
+            const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
+            obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
+            buckets[bucket].push(obj);
+            bucketManager.writeBuckets("DL", buckets);
+            logger.log("Video uploaded via url" + JSON.stringify(obj));
+            res.send("Video uploaded");
+            ytdl.on('close', async function (code){
+              if(code !== 0){
+                logger.err("An error occured while trying to download the video: " + url);
+                res.status(400).send("An error occured while downloading the video");
+                if(imagePath){
+                  fs.unlinkSync("./tmp/" + imagePath);
+                }
+                if(fs.existsSync("./tmp/" + filename + ".mp4")){
+                  fs.unlinkSync("./tmp/" + filenaem + ".mp4");
+                }
+                bucketManager.unlock("DL");
               }
-              if(sTime > maxDuration)
-                sTime = maxDuration;
-              availableBucket(buckets,ip,sTime).then((bucket) => {
-                obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:false, image:imagePath};
-                logger.log("Video downloaded: " + JSON.stringify(obj));
-                buckets[bucket].push(obj);
-                bucketManager.writeBuckets("DL", buckets);
-              });
+              else{
+                var buckets = await bucketManager.getBuckets("DL");
+                bucketInfo = buckets[bucket];
+                for(var i=0; i<bucketInfo.length; i++){
+                  if(bucketInfo[i].filename != obj.filename){
+                    continue;
+                  }
+                  bucketInfo[i].played = false;
+                  logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
+                  bucketManager.writeBuckets("DL", buckets);
+                }
+                bucketManager.unlock("DL");
+              }
             });
-          }
-        });
+          }).catch((e) => {
+            if(imagePath){
+              fs.unlinkSync("./tmp/" + imagePath);
+            }
+            logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
+            res.status(400).send("Cannot upload video -- You don't enough bucket space");
+            bucketManager.unlock("DL");
+          });
+        }
+        else{
+          bucketManager.unlock("DL");
+          const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
+          ytdl.on('close', async function(code){
+            if(code !== 0){
+              logger.error("An error occured while downloading the video: " + url);
+              if(imagePath){
+                fs.unlinkSync('./tmp/' + imagePath);
+              }
+              if(fs.existsSync('./tmp/' + filename + '.mp4')){
+                fs.unlinkSync('./tmp/' + filename + '.mp4');
+              }
+            }
+            else{
+              buckets = await bucketManager.getBuckets("DL");
+              var duration;
+              ffmpeg.ffprobe('./tmp/' + filename + '.mp4', function (err, metadata){
+                duration = "" + metadata.format.duration;
+                duration = duration.split(".")[0];
+                if(data.toFillTime)
+                sTime = toFillTime;
+                else if (startTime && endTime)
+                sTime = endTime-startTime;
+                else if (endTime)
+                sTime = endTime;
+                else {
+                  sTime = +duration;
+                  if(startTime)
+                  sTime -= startTime;
+                }
+                if(sTime > maxDuration)
+                sTime = maxDuration;
+                availableBucket(buckets,ip,sTime).then((bucket) => {
+                  obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:false, image:imagePath};
+                  logger.log("Video downloaded: " + JSON.stringify(obj));
+                  buckets[bucket].push(obj);
+                  bucketManager.writeBuckets("DL", buckets);
+                });
+              });
+            }
+          });
+        }
       }
     });
   },
@@ -202,24 +208,27 @@ module.exports = {
       res.status(400).send("Cannot upload a playlist");
       return;
     }
-    url = url.split("&")[0]
+    url = url.split("&")[0];
+    var jsoninfo = "";
     var jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
+    jsondump.stdout.on('data', (info) => {
+      jsoninfo += `${info}`;
+    });
     jsondump.on('close', (code) => {
       if(code !== 0){
         logger.log("A video upload was attmpted but failed: " + url);
         res.status(400).send("Cannot upload, check the url and try again");
       }
-    });
-    jsondump.stdout.on('data', (info) => {
-      info = JSON.parse(`${info}`);
-      if(!info.duration){
-        res.json({newVideoName: info.title, newVideoDuration: 0});
-      }
       else{
-        var obj = {newVideoName: info.title, newVideoDuration: info.duration};
-        res.json(obj);
+        var info = JSON.parse(jsoninfo);
+        if(!info.duration){
+          res.json({newVideoName: info.title, newVideoDuration: 0});
+        }
+        else{
+          res.json({newVideoName: info.title, newVideoDuration: info.duration});
+        }
+        res.send();
       }
-      res.send();
     });
   },
 
