@@ -117,9 +117,6 @@ module.exports = {
           bucketManager.writeBuckets("DL", buckets);
           logger.log("Video uploaded via url" + JSON.stringify(obj));
           res.send("Video uploaded");
-          ytdl.stdout.on('data', (data) => {
-            console.log(`${data}`);
-          });
           ytdl.on('close', async function (code){
             if(code !== 0){
               logger.err("An error occured while trying to download the video: " + url);
@@ -208,18 +205,17 @@ module.exports = {
     url = url.split("&")[0]
     var jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
     jsondump.stderr.on('data', (err) => {
-      console.log(`${err}`);
       logger.log("A video upload was attmpted: " + `${err}`);
       res.status(400).send("Cannot upload, check the url and try again");
     });
     jsondump.stdout.on('data', (info) => {
       info = JSON.parse(`${info}`);
       if(!info.duration){
-        res.write({newVideoName: info.title, newVideoDuration: 0});
+        res.json({newVideoName: info.title, newVideoDuration: 0});
       }
       else{
         var obj = {newVideoName: info.title, newVideoDuration: info.duration};
-        res.write(obj);
+        res.json(obj);
       }
       res.send();
     });
