@@ -325,9 +325,8 @@ module.exports = {
       res.send("Video uploaded");
       var obj = {ip: ip, title: data.filename, path: "./tmp/" + path.split("/")[2], duration: sTime, startTime: startTime, endTime: endTime, toFillTime: toFillTime, filename: path.split("/")[2], played: false, image: imagePath, dlId:dlId++};
       buckets[bucket].push(obj);
-      bucketManager.writeBuckets("FILESAVE");
+      bucketManager.writeBuckets("FILESAVE", buckets);
       logger.log("Video uploaded via manual upload " + JSON.stringify(obj));
-      playlist.unlock();
     }).catch((e) => {
       logger.log(JSON.stringify(ip) + " attempted to upload a video, but they had no available buckets.");
       res.status(400).send("Cannot upload video -- You don't enough bucket space");
