@@ -80,6 +80,7 @@ module.exports = {
       res.status(400).send("Cannot upload a playlist");
       return;
     }
+    url = url.split("&")[0];
     const jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
     jsondump.stderr.on('data', (err) => {
       logger.warn("Video upload failed: " + `${err}`);
@@ -110,12 +111,15 @@ module.exports = {
         if(sTime > maxDuration)
           sTime = maxDuration;
         availableBucket(buckets,ip,sTime).then((bucket) => {
-          const ytdl = exec.spawn('youtube-dl', ['--recode-video=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
+          const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
           obj = {ip:ip, title:title, duration:sTime, startTime: startTime, endTime: endTime, toFillTime:data.toFillTime, url:url, filename:filename +'.mp4', played:"downloading", image:imagePath};
           buckets[bucket].push(obj);
           bucketManager.writeBuckets("DL", buckets);
           logger.log("Video uploaded via url" + JSON.stringify(obj));
           res.send("Video uploaded");
+          ytdl.stdout.on('data', (data) => {
+            console.log(`${data}`);
+          });
           ytdl.on('close', async function (code){
             if(code !== 0){
               logger.err("An error occured while trying to download the video: " + url);
@@ -153,7 +157,7 @@ module.exports = {
       }
       else{
         bucketManager.unlock("DL");
-        const ytdl = exec.spawn('youtube-dl', ['--recode-video=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
+        const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
         ytdl.on('close', async function(code){
           if(code !== 0){
             logger.error("An error occured while downloading the video: " + url);
@@ -201,6 +205,7 @@ module.exports = {
       res.status(400).send("Cannot upload a playlist");
       return;
     }
+    url = url.split("&")[0]
     var jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
     jsondump.stderr.on('data', (err) => {
       console.log(`${err}`);
@@ -210,12 +215,13 @@ module.exports = {
     jsondump.stdout.on('data', (info) => {
       info = JSON.parse(`${info}`);
       if(!info.duration){
-        res.send({newVideoName: info.title, newVideoDuration: 0});
+        res.write({newVideoName: info.title, newVideoDuration: 0});
       }
       else{
         var obj = {newVideoName: info.title, newVideoDuration: info.duration};
-        res.send(obj);
+        res.write(obj);
       }
+      res.send();
     });
   },
 
