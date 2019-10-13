@@ -31,33 +31,32 @@ process.on('message', (msg) => {
 
 setInterval(function(){
   if(!playing){
-    while(lock){
-      setTimeout(function(){},1000);
-    }
-    currentBucket = buckets[0];
-    if(currentBucket.length != 0){
-      if(i == currentBucket.length){
-        process.send({cmd:"LOCK"});
-        currentBucket = buckets.shift();
-        clearBucket(currentBucket);
-        buckets.push([]);
-        process.send({cmd:"UPDATE", buckets:buckets});
-        process.send({cmd:"UNLOCK"});
-        i = 0;
+    if(!lock){
+      currentBucket = buckets[0];
+      if(currentBucket.length != 0){
+        if(i == currentBucket.length){
+          process.send({cmd:"LOCK"});
+          currentBucket = buckets.shift();
+          clearBucket(currentBucket);
+          buckets.push([]);
+          process.send({cmd:"UPDATE", buckets:buckets});
+          process.send({cmd:"UNLOCK"});
+          i = 0;
+        }
+        var vid = currentBucket[i];
+        if(!vid.played){
+          console.log("Playing: " + vid.title);
+          logger.log("Playing video " + vid);
+          playing = true;
+          play(vid);
+        }
+        else if(vid.played == "downloading"){
+          console.log("Awaiting download.");
+        }
       }
-      var vid = currentBucket[i];
-      if(!vid.played){
-        console.log("Playing: " + vid.title);
-        logger.log("Playing video " + vid);
-        playing = true;
-        play(vid);
+      else{
+        console.log("No videos to play.");
       }
-      else if(vid.played == "downloading"){
-        console.log("Awaiting download.");
-      }
-    }
-    else{
-      console.log("No videos to play.");
     }
   }
 }, 2000);
