@@ -651,8 +651,8 @@
           this.items[index].splice(sIndex,1);
           var result = this.axios.post("/remove",{
             index: index,
-            sIndex: sIndex,
-            ip: ip
+            ip: ip,
+            sIndex: sIndex
           }).then((res)=>{});
         },
 

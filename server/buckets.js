@@ -88,7 +88,7 @@ module.exports = {
     });
     jsondump.on('close', async function(code){
       if(code !== 0){
-        logger.warn("Video upload failed: " + `${err}`);
+        logger.warn("Video upload failed: " + url);
         res.status(400).send("Cannot upload video, check the url and try again");
       }
       else{
@@ -124,7 +124,7 @@ module.exports = {
             res.send("Video uploaded");
             ytdl.on('close', async function (code){
               if(code !== 0){
-                logger.err("An error occured while trying to download the video: " + url);
+                logger.error("An error occured while trying to download the video: " + url);
                 res.status(400).send("An error occured while downloading the video");
                 if(imagePath){
                   fs.unlinkSync("./tmp/" + imagePath);
@@ -236,6 +236,7 @@ module.exports = {
     var buckets = await bucketManager.getBuckets("RM");
     var bucket = buckets[index];
     if(admin.adminSession(ip) || bucket[sIndex].ip == ip){
+      consol.log("TEST");
       var song = bucket.splice(sIndex, 1);
       logger.log("Video removed " + JSON.stringify(song));
       fs.unlinkSync('./tmp/' + song[0].filename);

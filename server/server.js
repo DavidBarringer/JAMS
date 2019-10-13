@@ -55,7 +55,7 @@ var express = require('express'),
       });
 
       app.post('/remove', function(req,res){
-        if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
+        if(admin.adminSession(req.ip) || req.body.ip == req.ip){
           dlManager.rm(req.body.index,req.body.sIndex,req.body.ip);
           res.send("Done");
         }
@@ -63,7 +63,7 @@ var express = require('express'),
 
       app.post('/kill', function(req,res){
         if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
-          bucketManger.kill();
+          bucketManager.kill();
           res.send("Done");
         }
         else{

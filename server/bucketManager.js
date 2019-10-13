@@ -62,10 +62,10 @@ module.exports = {
 
   unlock: function(lockName){
     if(lock != lockName){
-      logger.warn("Something tried to unlock buckets, but not the process that locked them (this should not happen): " + lockName);
+      logger.warn("Something tried to unlock buckets, but not the process that locked them (this should not happen): " + lockName + " " + lock);
     }
     else if(!lock){
-      logger.warn("Something tried to unlock buckets, but they weren't locked (this should not happen): " + lockName);
+      logger.warn("Something tried to unlock buckets, but they weren't locked (this should not happen): " + lockName + " " + lock);
     }
     else{
       lock = false;
