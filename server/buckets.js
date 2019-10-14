@@ -84,7 +84,7 @@ module.exports = {
     var jsoninfo = "";
     const jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
     jsondump.stdout.on('data', async function (info){
-      jsoninfo = `${info}`;
+      jsoninfo += `${info}`;
     });
     jsondump.on('close', async function(code){
       if(code !== 0){
@@ -102,15 +102,15 @@ module.exports = {
         filename = hash.digest('hex');
         if(info.duration){
           if(data.toFillTime)
-          sTime = toFillTime;
+            sTime = toFillTime;
           else if (startTime && endTime)
-          sTime = endTime-startTime;
+            sTime = endTime-startTime;
           else if (endTime)
-          sTime = endTime;
+            sTime = endTime;
           else {
             sTime = info.duration;
             if(startTime)
-            sTime -= startTime;
+              sTime -= startTime;
           }
           //Sets time to max vid length if it is over
           if(sTime > maxDuration)

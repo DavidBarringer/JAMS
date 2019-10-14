@@ -323,7 +323,7 @@
         x.debouncedCheckfETime = x.$_.debounce(this.checkfETime, 1000);
         x.fetchItems();
         setInterval(function(){
-          x.currTime += 500;
+          x.currTime = Date.now();
         }, 500);
         setInterval(function(){
           x.fetchItems();
