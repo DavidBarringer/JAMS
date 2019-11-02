@@ -239,7 +239,8 @@ module.exports = {
       var song = bucket.splice(sIndex, 1);
       logger.log("Video removed " + JSON.stringify(song));
       fs.unlinkSync('./tmp/' + song[0].filename);
-      reallocate(buckets, index, ip);
+      buckets = await reallocate(buckets, index, ip);
+      bucketManager.writeBuckets("RM", buckets);
     }
     else{
       bucketManager.unlock("RM");
@@ -263,7 +264,7 @@ module.exports = {
           }
         }
       }
-      bucketManager.writeBuckets("RM", buckets);
+      return buckets;
     }
   },
 

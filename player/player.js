@@ -10,8 +10,15 @@ var pid = -1;
 var i = 0;
 var buckets = [[]];
 var lock = false;
+var vlcVid;
 
 process.on('message', (msg) => {
+  if(msg.cmd == "KILL"){
+    try{
+      vlcVid.kill();
+    }
+    catch(e){}
+  }
   if(msg.cmd == "UPDATE"){
     buckets = msg.buckets;
   }
@@ -76,12 +83,12 @@ async function play(vid){
   process.send({cmd:"UNLOCK"});
   if(vid.image){
     const vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
-    const vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true});
+    vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
     exitCheck(vlcVid,vlcImg);
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
-      const vlcVid = child.spawn('vlc', [ '-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
+      vlcVid = child.spawn('vlc', ['-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
       exitCheck(vlcVid, false);
     }
     else{
@@ -91,14 +98,6 @@ async function play(vid){
 };
 
 function exitCheck(vlcVid, vlcImg){
-  process.on('message', (msg) => {
-    if(msg.cmd == "KILL"){
-      try{
-        vlcVid.kill();
-      }
-      catch(e){}
-    }
-  });
   vlcVid.on('exit', (code,signal)=>{
     if(vlcImg){
       vlcImg.kill();
