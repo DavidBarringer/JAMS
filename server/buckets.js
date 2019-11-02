@@ -236,7 +236,6 @@ module.exports = {
     var buckets = await bucketManager.getBuckets("RM");
     var bucket = buckets[index];
     if(admin.adminSession(ip) || bucket[sIndex].ip == ip){
-      consol.log("TEST");
       var song = bucket.splice(sIndex, 1);
       logger.log("Video removed " + JSON.stringify(song));
       fs.unlinkSync('./tmp/' + song[0].filename);

@@ -12,12 +12,6 @@ var buckets = [[]];
 var lock = false;
 
 process.on('message', (msg) => {
-  if(msg.cmd == "KILL"){
-    try{
-      vlcVid.kill();
-    }
-    catch(e){}
-  }
   if(msg.cmd == "UPDATE"){
     buckets = msg.buckets;
   }
@@ -97,6 +91,14 @@ async function play(vid){
 };
 
 function exitCheck(vlcVid, vlcImg){
+  process.on('message', (msg) => {
+    if(msg.cmd == "KILL"){
+      try{
+        vlcVid.kill();
+      }
+      catch(e){}
+    }
+  });
   vlcVid.on('exit', (code,signal)=>{
     if(vlcImg){
       vlcImg.kill();
