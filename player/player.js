@@ -1,6 +1,5 @@
 var fs = require('fs');
 var child = require('child_process');
-var playlist = require('./playlist.js');
 var admin = require('../server/admin.js');
 var logger = require('../log/logger.js');
 var currentBucket;

@@ -47,7 +47,7 @@ module.exports = {
   },
 
   writeBuckets: function(lockName, toWrite){
-    if(lock != lockName){
+    if(lock && lock != lockName){
       logger.warn("Something tried to write to buckets, but buckets were locked (this should not happen): " + lockName);
     }
     else{
@@ -57,6 +57,30 @@ module.exports = {
       }
       lock = false;
       player.send({cmd: "UNLOCK"});
+    }
+  },
+
+  newBuckets: async function(bucketNum){
+    await this.getBuckets("THIS");
+    if(bucketNum == buckets.length){
+      this.unlock("THIS");
+      return;
+    }
+    else{
+      if(bucketNum > buckets.length){
+        var shiftNum = bucketNum - buckets.length;
+        for(var i=0; i<shiftNum; i++){
+          buckets.push([]);
+          this.writeBuckets("THIS", buckets);
+        }
+      }
+      else{
+        var shiftNum = buckets.length - bucketNum;
+        for(var i=0; i<shiftNum; i++){
+          buckets.pop();
+          this.writeBuckets("THIS", buckets);
+        }
+      }
     }
   },
 

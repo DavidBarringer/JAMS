@@ -111,7 +111,7 @@ var express = require('express'),
           config.bucketNum = req.body.bucketNum;
           config.bucketVideos = req.body.bucketVideos;
           config.bucketLength = req.body.bucketLength;
-          playlist.newBuckets(oldNum, req.body.bucketNum);
+          bucketManager.newBuckets(oldNum, req.body.bucketNum);
           admin.changeConfig(config);
         }
         else{
