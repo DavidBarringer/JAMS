@@ -84,7 +84,6 @@ async function play(vid){
   if(vid.image){
     vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
     vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
-    exitCheck(vlcVid,vlcImg);
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
@@ -98,7 +97,9 @@ async function play(vid){
     if(vlcImg){
       vlcImg.kill();
     }
-    while(lock){}
+    while(lock){
+      await sleep(1000);
+    }
     process.send({cmd:"LOCK"});
     currentBucket = buckets[0];
     vid = currentBucket[i];

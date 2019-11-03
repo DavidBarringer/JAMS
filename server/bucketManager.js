@@ -19,6 +19,11 @@ player.on('message', (msg) => {
     }
   }
   if(msg.cmd == "LOCK"){
+    while(lock && lock != lockName){
+      setTimeout(function(){
+        console.log(lock + ", PLAYER");
+      },1000);
+    }
     lock = "PLAYER";
   }
   if(msg.cmd == "UNLOCK"){
@@ -37,9 +42,7 @@ player.on('message', (msg) => {
 module.exports = {
   getBuckets: function(lockName){
     while (lock && lock != lockName){
-      setTimeout(function(){
-        console.log(lock, lockName);
-      },1000);
+      await sleep(1000);
     }
     lock = lockName;
     player.send({cmd:"LOCK"});
