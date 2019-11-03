@@ -40,7 +40,7 @@ player.on('message', (msg) => {
 });
 
 module.exports = {
-  getBuckets: function(lockName){
+  getBuckets: async function(lockName){
     while (lock && lock != lockName){
       await sleep(1000);
     }

@@ -199,6 +199,15 @@ $link-focus-border: white;
   bottom: 0rem;
 }
 
+
+.bckImg{
+  height: 40%;
+  width: 100%;
+  margin-top:-2rem;
+  z-index: -5;
+  position: fixed;
+}
+
 .panelButton{
   height: 0.5rem;
   background-color: $warwickgg_dark_grey;
