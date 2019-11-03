@@ -10,6 +10,7 @@ var i = 0;
 var buckets = [[]];
 var lock = false;
 var vlcVid;
+var vlcImg;
 
 process.on('message', (msg) => {
   if(msg.cmd == "KILL"){
@@ -81,7 +82,7 @@ async function play(vid){
   process.send({cmd:"UPDATE", buckets:buckets});
   process.send({cmd:"UNLOCK"});
   if(vid.image){
-    const vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
+    vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
     vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
     exitCheck(vlcVid,vlcImg);
   }
