@@ -94,9 +94,6 @@ async function play(vid){
       console.log("Unable to play " + vid.filename);
     }
   }
-};
-
-function exitCheck(vlcVid, vlcImg){
   vlcVid.on('exit', (code,signal)=>{
     if(vlcImg){
       vlcImg.kill();
@@ -113,7 +110,7 @@ function exitCheck(vlcVid, vlcImg){
     process.send({cmd:"UNLOCK"});
     playing = false;
   });
-}
+};
 
 function clearBucket(bucket){
   for(var j = 0; j < bucket.length; j++){
