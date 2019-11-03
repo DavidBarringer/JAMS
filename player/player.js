@@ -88,7 +88,6 @@ async function play(vid){
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
       vlcVid = child.spawn('vlc', ['-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
-      exitCheck(vlcVid, false);
     }
     else{
       console.log("Unable to play " + vid.filename);
