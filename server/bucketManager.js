@@ -9,7 +9,7 @@ for(var i = 0; i < admin.getConfig().bucketNum; i++){
 var lock = false;
 const player = exec.fork(`${__dirname}/../player/player.js`, {detached: true});
 
-player.on('message', (msg) => {
+player.on('message', async (msg) => {
   if(msg.cmd == "UPDATE"){
     if(lock != "PLAYER"){
       logger.warn("Something tried to write to buckets, but buckets were locked (this should not happen): PLAYER");
@@ -20,9 +20,7 @@ player.on('message', (msg) => {
   }
   if(msg.cmd == "LOCK"){
     while(lock && lock != lockName){
-      setTimeout(function(){
-        console.log(lock + ", PLAYER");
-      },1000);
+      await sleep(1000);
     }
     lock = "PLAYER";
   }

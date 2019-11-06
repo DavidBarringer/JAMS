@@ -9,9 +9,6 @@
         <a class="aliasButton" v-bind:title="alias" v-on:click="aliasHidden = !aliasHidden">Alias: {{ alias }}</a>
       </div>
       <br/>
-      <div>
-        <img src="JAMS_image.png" class="bckImg">
-      </div>
       <div class = "uploadTabs">
         <a v-bind:class="{active: activeTab == 0}" v-on:click="swapTab(0)"><span>URL</span></a>
         <a v-bind:class="{active: activeTab == 1}" v-on:click="swapTab(1)"><span>File</span></a>

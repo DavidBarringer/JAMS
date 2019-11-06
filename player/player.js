@@ -93,7 +93,7 @@ async function play(vid){
       console.log("Unable to play " + vid.filename);
     }
   }
-  vlcVid.on('exit', (code,signal)=>{
+  vlcVid.on('exit', async(code,signal) => {
     if(vlcImg){
       vlcImg.kill();
     }
