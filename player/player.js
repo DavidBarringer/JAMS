@@ -12,16 +12,6 @@ var lock = false;
 var vlcVid;
 var vlcImg;
 
-const vidArgList = ['--demux=avformat,none',
-                    '--codec=avcodec,all',
-                    '--play-and-exit',
-                    '--stop-time=',
-                    '--global-key-quit=Esc',
-                    '--start-time=',
-                    '--no-qt-fs-controller',
-                    '--norm-buff-size=10',
-                    '--norm-max-level=2.0'];
-
 process.on('message', (msg) => {
   if(msg.cmd == "KILL"){
     try{
@@ -74,6 +64,15 @@ setInterval(function(){
 
 
 async function play(vid){
+  var vidArgList = ['--demux=avformat,none',
+                      '--codec=avcodec,all',
+                      '--play-and-exit',
+                      '--stop-time=',
+                      '--global-key-quit=Esc',
+                      '--start-time=',
+                      '--no-qt-fs-controller',
+                      '--norm-buff-size=10',
+                      '--norm-max-level=2.0'];
   var maxLength = admin.getConfig().bucketLength;
   var stoptime = maxLength;
   var startTime = 0;
@@ -100,6 +99,7 @@ async function play(vid){
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
+      vidArgList.unshift('f');
       vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
     }
     else{
