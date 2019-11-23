@@ -99,7 +99,7 @@ async function play(vid){
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
-      vidArgList.unshift('f');
+      vidArgList.unshift('-f');
       vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
     }
     else{
