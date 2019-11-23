@@ -1,7 +1,10 @@
 var fs = require('fs');
 var path = require('path');
-var bucketManager = require('./server/bucketManager.js');
+var bucketManager;
 module.exports={
+  setManager: function(manager){
+    bucketManager = manager;
+  },
   download: async function(id, res){
     var pth;
     var buckets = bucketManager.getBuckets("USERDL");

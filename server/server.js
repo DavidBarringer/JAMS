@@ -6,11 +6,12 @@ var fs = require('fs');
 var exec = require('child_process');
 var dlManager = require('./buckets.js');
 var bucketManager = require('./bucketManager.js');
+var dl = require('./download.js');
+dl.setManager(bucketManager);
 dlManager.setManager(bucketManager);
 var admin = require('./admin.js');
 var alias = require('./alias.js');
 var logger = require('../log/logger.js');
-var dl = require('./download.js');
 var formidable = require('formidable');
 var exec = require('child_process');
 var express = require('express'),
