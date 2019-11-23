@@ -65,14 +65,15 @@ setInterval(function(){
 
 async function play(vid){
   var vidArgList = ['--demux=avformat,none',
-                      '--codec=avcodec,all',
-                      '--play-and-exit',
-                      '--stop-time=',
-                      '--global-key-quit=Esc',
-                      '--start-time=',
-                      '--no-qt-fs-controller',
-                      '--norm-buff-size=10',
-                      '--norm-max-level=3.0'];
+                    '--codec=avcodec,all',
+                    '--play-and-exit',
+                    '--stop-time=',
+                    '--global-key-quit=Esc',
+                    '--start-time=',
+                    '--no-video-title-show',
+                    '--no-qt-fs-controller',
+                    '--norm-buff-size=10',
+                    '--norm-max-level=3.0'];
   var maxLength = admin.getConfig().bucketLength;
   var stoptime = maxLength;
   var startTime = 0;
@@ -95,8 +96,8 @@ async function play(vid){
   vidArgList.push('tmp/'+vid.filename);
   if(vid.image){
     vidArgList.unshift('--qt-start-minimized');
-    vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
     vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
+    vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
