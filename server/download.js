@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var bucketManager = require('./server/bucketManager');
+var bucketManager = require('./server/bucketManager.js');
 module.exports={
   download: async function(id, res){
     var pth;
