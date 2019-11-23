@@ -1,10 +1,10 @@
 var fs = require('fs');
-var playlist = require('../player/playlist.js');
 var path = require('path');
+var bucketManager = require('./server/bucketManager');
 module.exports={
   download: async function(id, res){
     var pth;
-    var buckets = await playlist.read();
+    var buckets = bucketManager.getBuckets("USERDL");
     for(var i = 0; i < buckets.length; i++){
       var bucket = buckets[i];
       for(var j = 0; j < bucket.length; j++){
@@ -13,7 +13,7 @@ module.exports={
         }
       }
     }
-    playlist.unlock();
+    var buckets = bucketManager.unlock("USERDL");
     if(pth){
       var file = fs.readFileSync(pth);
       res.send(file);
