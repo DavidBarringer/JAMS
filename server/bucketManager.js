@@ -9,6 +9,10 @@ for(var i = 0; i < admin.getConfig().bucketNum; i++){
 var lock = false;
 const player = exec.fork(`${__dirname}/../player/player.js`, {detached: true});
 
+function sleep(ms){
+  return new Promise (resolve => {setTimeout(resolve,ms)});
+}
+
 player.on('message', async (msg) => {
   if(msg.cmd == "UPDATE"){
     if(lock != "PLAYER"){

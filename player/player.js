@@ -12,6 +12,16 @@ var lock = false;
 var vlcVid;
 var vlcImg;
 
+const vidArgList = ['--demux=avformat,none',
+                    '--codec=avcodec,all',
+                    '--play-and-exit',
+                    '--stop-time=',
+                    '--global-key-quit=Esc',
+                    '--start-time=',
+                    '--no-qt-fs-controller',
+                    '--norm-buff-size=10',
+                    '--norm-max-level=2.0'];
+
 process.on('message', (msg) => {
   if(msg.cmd == "KILL"){
     try{
@@ -81,13 +91,16 @@ async function play(vid){
   vid.played = Date.now();
   process.send({cmd:"UPDATE", buckets:buckets});
   process.send({cmd:"UNLOCK"});
+  vidArgList[3]+=stoptime;
+  vidArgList[5]+=startTime;
+  vidArgList.push('tmp/'+vid.filename);
   if(vid.image){
     vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
-    vlcVid = child.spawn('vlc', ['--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit=Esc', '--start-time='+startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
+    vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
   }
   else{
     if(fs.existsSync("tmp/" + vid.filename)){
-      vlcVid = child.spawn('vlc', ['-f', '--no-video-title-show', '--demux=avformat,none', '--codec=avcodec,all', '--play-and-exit', '--stop-time=' + stoptime, '--global-key-quit', 'Esc', '--start-time=' + startTime, '--no-qt-fs-controller', 'tmp/' + vid.filename], {windowsHide:true,stdio:'ignore'});
+      vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
     }
     else{
       console.log("Unable to play " + vid.filename);
