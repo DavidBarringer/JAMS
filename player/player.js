@@ -12,6 +12,10 @@ var lock = false;
 var vlcVid;
 var vlcImg;
 
+function sleep(ms){
+  return new Promise (resolve => {setTimeout(resolve,ms)});
+}
+
 process.on('message', (msg) => {
   if(msg.cmd == "KILL"){
     try{
@@ -95,7 +99,7 @@ async function play(vid){
   vidArgList[5]+=startTime;
   vidArgList.push('tmp/'+vid.filename);
   if(vid.image){
-    vidArgList.unshift('--qt-start-minimized');
+    vidArgList.push('--qt-start-minimized');
     vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
     vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
   }

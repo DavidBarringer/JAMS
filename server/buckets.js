@@ -82,25 +82,27 @@ module.exports = {
     }
     url = url.split("&")[0];
     var jsoninfo = "";
-    const jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
-    jsondump.stdout.on('data', async function (info){
+    const dump = exec.spawn('youtube-dl', ['--get-title', '--get-filename', '--get-duration', url])
+    dump.stdout.on('data', async function (info){
       jsoninfo += `${info}`;
     });
-    jsondump.on('close', async function(code){
+    dump.on('close', async function(code){
       if(code !== 0){
         logger.warn("Video upload failed: " + url);
         res.status(400).send("Cannot upload video, check the url and try again");
       }
       else{
-        var info = JSON.parse(jsoninfo);
-        var title = info.title;
-        filename = info._filename;
-        var buckets = await bucketManager.getBuckets("DL");
-        var sTime;
+        jsoninfo = jsoninfo.split('\n');
+        var title = jsoninfo[0];
+        var duration = jsoninfo[2];
         var hash = crypto.createHash('sha256');
-        hash.update(filename + Date.now());
+        hash.update(jsoninfo[1] + Date.now());
         filename = hash.digest('hex');
-        if(info.duration){
+        if(duration){
+          var buckets = await bucketManager.getBuckets("DL");
+          var a = duration.split(':');
+          duration = a.reduce((acc, time) => (60 * acc) + +time);
+          var sTime;
           if(data.toFillTime)
             sTime = toFillTime;
           else if (startTime && endTime)
@@ -108,7 +110,7 @@ module.exports = {
           else if (endTime)
             sTime = endTime;
           else {
-            sTime = info.duration;
+            sTime = duration;
             if(startTime)
               sTime -= startTime;
           }
@@ -130,7 +132,7 @@ module.exports = {
                   fs.unlinkSync("./tmp/" + imagePath);
                 }
                 if(fs.existsSync("./tmp/" + filename + ".mp4")){
-                  fs.unlinkSync("./tmp/" + filenaem + ".mp4");
+                  fs.unlinkSync("./tmp/" + filename + ".mp4");
                 }
                 bucketManager.unlock("DL");
               }
@@ -163,6 +165,7 @@ module.exports = {
           ytdl.on('close', async function(code){
             if(code !== 0){
               logger.error("An error occured while downloading the video: " + url);
+              res.status(400).send("An error occured while downloading the video");
               if(imagePath){
                 fs.unlinkSync('./tmp/' + imagePath);
               }
@@ -171,6 +174,7 @@ module.exports = {
               }
             }
             else{
+              res.send("Video uploaded");
               buckets = await bucketManager.getBuckets("DL");
               var duration;
               ffmpeg.ffprobe('./tmp/' + filename + '.mp4', function (err, metadata){
@@ -210,22 +214,24 @@ module.exports = {
     }
     url = url.split("&")[0];
     var jsoninfo = "";
-    var jsondump = exec.spawn('youtube-dl', ['--dump-json', url]);
-    jsondump.stdout.on('data', (info) => {
+    const dump = exec.spawn('youtube-dl', ['--get-title', '--get-duration', url])
+    dump.stdout.on('data', async function (info){
       jsoninfo += `${info}`;
     });
-    jsondump.on('close', (code) => {
+    dump.on('close', (code) => {
       if(code !== 0){
         logger.log("A video upload was attmpted but failed: " + url);
         res.status(400).send("Cannot upload, check the url and try again");
       }
       else{
-        var info = JSON.parse(jsoninfo);
-        if(!info.duration){
-          res.json({newVideoName: info.title, newVideoDuration: 0});
+        jsoninfo = jsoninfo.split('\n');
+        if(!jsoninfo[1]){
+          res.json({newVideoName: jsoninfo[0] + " (duration unknown)", newVideoDuration: 0});
         }
         else{
-          res.json({newVideoName: info.title, newVideoDuration: info.duration});
+          var a = jsoninfo[1].split(':');
+          var duration = a.reduce((acc, time) => (60 * acc) + +time);
+          res.json({newVideoName: jsoninfo[0], newVideoDuration: duration});
         }
         res.send();
       }

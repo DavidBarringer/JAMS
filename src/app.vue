@@ -468,44 +468,46 @@
             this.availableBucket = -1;
             this.canUpload = true;
           }
-          var duration;
-          if(this.activeTab === 0)
+          else{
+            var duration;
+            if(this.activeTab === 0)
             duration = this.eTime - this.sTime;
-          if(this.activeTab === 1)
+            if(this.activeTab === 1)
             duration = this.fETime - this.fSTime;
-          if(duration > this.bucketLength)
+            if(duration > this.bucketLength)
             duration = this.bucketLength;
-          for (var j = 0; j<this.items.length; j++){
-            var time = this.bucketLength;
-            var bucket = this.items[j];
-            for(var i = 0; i<bucket.length; i++){
-              if(this.ip == bucket[i].ip)
+            for (var j = 0; j<this.items.length; j++){
+              var time = this.bucketLength;
+              var bucket = this.items[j];
+              for(var i = 0; i<bucket.length; i++){
+                if(this.ip == bucket[i].ip)
                 time -= bucket[i].duration;
-            }
-            if(time > 0 && this.fToFillCheck && this.activeTab == 1){
-              this.availableBucket = j;
-              this.fCanUpload = true;
-              return;
-            }
-            if(time > 0 && this.toFillCheck && this.activeTab == 0){
-              this.availableBucket = j;
-              this.canUpload = true;
-              return;
-            }
-            time -= duration;
-            if (time >= 0){
-              this.availableBucket = j;
-              if(this.activeTab == 0)
-                this.canUpload = true;
-              else
+              }
+              if(time > 0 && this.fToFillCheck && this.activeTab == 1){
+                this.availableBucket = j;
                 this.fCanUpload = true;
-              return;
+                return;
+              }
+              if(time > 0 && this.toFillCheck && this.activeTab == 0){
+                this.availableBucket = j;
+                this.canUpload = true;
+                return;
+              }
+              time -= duration;
+              if (time >= 0){
+                this.availableBucket = j;
+                if(this.activeTab == 0)
+                this.canUpload = true;
+                else
+                this.fCanUpload = true;
+                return;
+              }
             }
-          }
-          if(this.activeTab == 0)
+            if(this.activeTab == 0)
             this.message = "No space to upload this video";
-          else
+            else
             this.fMessage = "No space to upload this video";
+          }
         },
         async addUrl(){
           this.uploading = true;

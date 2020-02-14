@@ -3,6 +3,11 @@ var admin = require('./admin.js');
 var logger = require('../log/logger.js');
 var exec = require('child_process');
 var buckets = [];
+
+process.on("exit", () => {
+  logger.log("Exit buckets state: " + buckets);
+});
+
 for(var i = 0; i < admin.getConfig().bucketNum; i++){
   buckets.push([]);
 }
