@@ -464,7 +464,7 @@
           this.fImage = this.$refs.fImage.files[0];
         },
         findAvailableBucket(){
-          if(this.newVideoDuration === 0){
+          if(this.newVideoDuration === 0 && this.activeTab === 0){
             this.availableBucket = -1;
             this.canUpload = true;
           }
