@@ -101,7 +101,7 @@ module.exports = {
         if(duration){
           var buckets = await bucketManager.getBuckets("DL");
           var a = duration.split(':');
-          duration = a.reduce((acc, time) => (60 * acc) + +time);
+          duration = +a.reduce((acc, time) => (60 * acc) + +time);
           var sTime;
           if(data.toFillTime)
             sTime = toFillTime;
