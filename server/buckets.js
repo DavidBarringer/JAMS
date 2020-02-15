@@ -230,7 +230,7 @@ module.exports = {
         }
         else{
           var a = jsoninfo[1].split(':');
-          var duration = a.reduce((acc, time) => (60 * acc) + +time);
+          var duration = +a.reduce((acc, time) => (60 * acc) + +time);
           res.json({newVideoName: jsoninfo[0], newVideoDuration: duration});
         }
         res.send();
