@@ -45,6 +45,8 @@ module.exports={
     logger.log("The config has been changed " + newConfig);
     var conf = jsonfile.readFileSync('configActive.json');
     config = newConfig;
+    config.password = conf.password;
+    config.salt = conf.salt;
     jsonfile.writeFileSync('configActive.json', config);
   }
 }
