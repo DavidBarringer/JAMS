@@ -331,14 +331,15 @@ module.exports = {
     var sTime;
     if(toFillTime)
       sTime = toFillTime;
+    else if (startTime && endTime)
+      sTime = endTime-startTime;
     else if (endTime)
       sTime = endTime;
-    else
+    else {
       sTime = data.duration;
-    if(startTime)
-      sTime -= startTime;
-    if(sTime > maxDuration)
-      sTime = maxDuration;
+      if(startTime)
+        sTime -= startTime;
+    }
     availableBucket(buckets, ip, sTime).then((bucket)=>{
       res.send("Video uploaded");
       var obj = {ip: ip, title: data.filename, path: "./tmp/" + path.split("/")[2], duration: sTime, startTime: startTime, endTime: endTime, toFillTime: toFillTime, filename: path.split("/")[2], played: false, image: imagePath, dlId:dlId++};
