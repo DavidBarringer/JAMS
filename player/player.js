@@ -100,7 +100,7 @@ async function play(vid){
   vidArgList.push('tmp/'+vid.filename);
   if(vid.image){
     vidArgList.push('--qt-start-minimized');
-    vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
+    vlcVid = child.spawn('cvlc', vidArgList, {windowsHide:true, stdio:'ignore'});
     vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
   }
   else{
