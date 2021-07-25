@@ -13,22 +13,20 @@ let i = 0;
 let vlcVid;
 let vlcImg;
 
-function sleep(ms){
-		return new Promise (resolve => {setTimeout(resolve,ms)});
+module.exports = {
+		setManager: function (bucketManger){
+				this.bucketManager = bucketManager;
+		}
 }
 
-process.on('message', msg => {
-		bucketManager = msg.manager;
-});
-
-setInterval(async function(){
+setInterval(function(){
 		if(!playing){
-				buckets = bucketManager.getBuckets();
+				bucketManager.getBuckets().then(buckets => {
 				currentBucket = buckets[0];
 				if(currentBucket.length != 0){
 						if(i == currentBucket.length){
 								currentBucket = buckets.shift();
-								clearBucket(currentBucket);
+								bucketManager.clearBucket(currentBucket);
 								buckets.push([]);
 								i = 0;
 						}
@@ -48,11 +46,12 @@ setInterval(async function(){
 						console.log("No videos to play.");
 						bucketManager.unlock();
 				}
+				});
 		}
 }, 2000);
 
 
-async function play(vid){
+function play(vid){
 		let vidArgList = ['--demux=avformat,none',
 											'--codec=avcodec,all',
 											'--play-and-exit',
@@ -101,30 +100,15 @@ async function play(vid){
 				if(vlcImg){
 						vlcImg.kill();
 				}
-				buckets = bucketManager.getBuckets();
-				currentBucket = buckets[0];
-				vid = currentBucket[i];
-				vid.played = "done";
-				logger.log("Video ended " + JSON.stringify(vid));
-				i++;
-				console.log("Done");
-				bucketManager.writeBuckets(buckets);
-				playing = false;
+				bucketManager.getBuckets().then(buckets => {
+						currentBucket = buckets[0];
+						vid = currentBucket[i];
+						vid.played = "done";
+						logger.log("Video ended " + JSON.stringify(vid));
+						i++;
+						console.log("Done");
+						bucketManager.writeBuckets(buckets);
+						playing = false;
+				});
 		});
-};
-
-function clearBucket(bucket){
-		for(var j = 0; j < bucket.length; j++){
-				logger.log(JSON.stringify(bucket[j].filename));
-				try{
-						fs.unlinkSync('./tmp/' + bucket[j].filename);
-						if(bucket[j].image){
-								fs.unlinkSync('./tmp/' + bucket[j].image);
-								logger.log(JSON.stringify(bucket[j].image));
-						}
-				}
-				catch(e){
-						logger.error("An error occured trying to remove video file " + JSON.stringify(bucket[j].filename) + "\nError: " + e);
-				}
-		}
 }

@@ -2,6 +2,7 @@
 const admin = require('./admin.js');
 const logger = require('../log/logger.js');
 const exec = require('child_process');
+const fs = require('fs');
 let buckets = [];
 
 process.on("exit", () => {
@@ -14,9 +15,9 @@ for(let i = 0; i < admin.getConfig().bucketNum; i++){
 var lock = false;
 // const player = exec.fork(`${__dirname}/../player/player.js`, {detached: true});
 
-function sleep(ms){
-  return new Promise (resolve => {setTimeout(resolve,ms)});
-}
+// function sleep(ms){
+//   return new Promise (resolve => {setTimeout(resolve,ms)});
+// }
 
 // player.on('message', async (msg) => {
 //   if(msg.cmd == "UPDATE"){
@@ -49,7 +50,6 @@ function sleep(ms){
 module.exports = {
   getBuckets: async function(lockName){
     while (lock && lock != lockName){
-      await sleep(1000);
     }
     lock = lockName;
     return new Promise((resolve) => resolve(buckets));
@@ -94,5 +94,24 @@ module.exports = {
 			} else{
 					lock = false;
 			}
-  }
+  },
+		
+		clearBucket: async function(bucket){
+				await this.getBuckets("THIS");
+				for(var j = 0; j < bucket.length; j++){
+						logger.log(JSON.stringify(bucket[j].filename));
+						try{
+								fs.unlinkSync('./tmp/' + bucket[j].filename);
+								if(bucket[j].image){
+										fs.unlinkSync('./tmp/' + bucket[j].image);
+										logger.log(JSON.stringify(bucket[j].image));
+								}
+								this.unlock("THIS");
+						}
+						catch(e){
+								logger.error("An error occured trying to remove video file " + JSON.stringify(bucket[j].filename) + "\nError: " + e);
+								this.unlock("THIS");
+						}
+				}
+		}
 }

@@ -8,8 +8,10 @@ const exec = require('child_process');
 const dlManager = require('./buckets.js');
 const bucketManager = require('./bucketManager.js');
 const dl = require('./download.js');
+const player = require('../player/player.js');
 dl.setManager(bucketManager);
 dlManager.setManager(bucketManager);
+player.setManager(bucketManager);
 const admin = require('./admin.js');
 const alias = require('./alias.js');
 const logger = require('../log/logger.js');
@@ -136,7 +138,3 @@ const port = admin.getPort();
 var server = app.listen(port, () => {
 		logger.log("Server started running on port " + port);
 });
-
-const player = exec.fork("../player/player.js", {detached: true, stdio: 'ignore'});
-player.send({manger: bucketManager});
-player.unref();
