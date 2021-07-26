@@ -14,7 +14,7 @@ let vlcVid;
 let vlcImg;
 
 module.exports = {
-		setManager: function (bucketManger){
+		setManager: function (bucketManager){
 				this.bucketManager = bucketManager;
 		}
 }
@@ -84,13 +84,13 @@ function play(vid){
 		vidArgList.push('tmp/'+vid.filename);
 		if(vid.image){
 				vidArgList.unshift('--no-video');
-				vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
-				vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {stdio: 'ignore'});
+				vlcVid = child.spawn('vlc', vidArgList, {detached: true, windowsHide:true, stdio:'ignore'});
+				vlcImg = child.spawn('vlc', ['-f', '--no-video-title-show', '--play-and-exit', '--image-duration=' + stoptime, '--no-qt-fs-controller', 'tmp/' + vid.image], {detached: true, stdio: 'ignore'});
 		}
 		else{
 				if(fs.existsSync("tmp/" + vid.filename)){
 						vidArgList.unshift('-f');
-						vlcVid = child.spawn('vlc', vidArgList, {windowsHide:true, stdio:'ignore'});
+						vlcVid = child.spawn('vlc', vidArgList, {detached: true, windowsHide:true, stdio:'ignore'});
 				}
 				else{
 						console.log("Unable to play " + vid.filename);

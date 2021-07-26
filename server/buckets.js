@@ -1,15 +1,15 @@
 //var ytdl = require('youtube-dl');
-var fs = require('fs');
-var crypto = require('crypto');
-var exec = require('child_process');
-var bucketManager;
-var admin = require('./admin.js');
-var logger = require('../log/logger.js');
-var formidable = require('formidable');
-var ffmpeg = require('fluent-ffmpeg');
-var dlId = 0;
+const fs = require('fs');
+const crypto = require('crypto');
+const exec = require('child_process');
+let bucketManager;
+const admin = require('./admin.js');
+const logger = require('../log/logger.js');
+const formidable = require('formidable');
+const ffmpeg = require('fluent-ffmpeg');
+let dlId = 0;
 
-var fileTmp = [];
+let fileTmp = [];
 
 /*
   Finds the first available bucket that accomodates the videos runtime,
@@ -20,22 +20,22 @@ var fileTmp = [];
   the maximum allocated time.
 */
 function availableBucket(buckets, user, duration){
-  var config = admin.getConfig();
-  var maxDuration = config.bucketLength;
-  var maxCount = config.bucketVideos;
-  var count;
-  for(var i = 0; i < buckets.length; i++){
-    var bucket = buckets[i];
-    var durationSum = 0;
+  const config = admin.getConfig();
+  const maxDuration = config.bucketLength;
+  const maxCount = config.bucketVideos;
+  let count;
+  for(let i = 0; i < buckets.length; i++){
+    let bucket = buckets[i];
+    let durationSum = 0;
     count = 0;
-    var notFull = bucket.every(function(item){
+    let notFull = bucket.every(function(item){
       if(item.ip != user){
         return 1;
       }
       else{
         count++;
         durationSum += Number(item.duration);
-        var total = Number(durationSum) + Number(duration);
+        let total = Number(durationSum) + Number(duration);
         if(total > maxDuration || count >= maxCount){
           return 0;
         }
@@ -58,19 +58,19 @@ module.exports = {
     bucketManager = manager;
   },
 
-  dl: async function (form, data, files, ip, res){
-    var maxDuration = admin.getConfig().bucketLength;
-    var filename;
-    var bucket;
-    var obj;
-    var url = data.url;
-    var startTime = data.startTime;
-    var endTime = data.endTime;
-    var toFillTime = data.toFillTime;
-    var imagePath = "";
+  dl: function (form, data, files, ip, res){
+    let maxDuration = admin.getConfig().bucketLength;
+    let filename;
+    let bucket;
+    let obj;
+    let url = data.url;
+    let startTime = data.startTime;
+    let endTime = data.endTime;
+    let toFillTime = data.toFillTime;
+    let imagePath = "";
     if(files.image){
-      var file = files.image;
-      var hash = crypto.createHash('sha256');
+      let file = files.image;
+      let hash = crypto.createHash('sha256');
       hash.update(file.name + Date.now());
       imagePath = hash.digest('hex') + "." + file.type.substring(6);
       fs.copyFileSync(file.path, "./tmp/" + imagePath);
@@ -81,7 +81,7 @@ module.exports = {
       return;
     }
     url = url.split("&")[0];
-    var jsoninfo = "";
+    let jsoninfo = "";
     const dump = exec.spawn('youtube-dl', ['--get-title', '--get-filename', '--get-duration', url])
     dump.stdout.on('data', async function (info){
       jsoninfo += `${info}`;
@@ -93,16 +93,16 @@ module.exports = {
       }
       else{
         jsoninfo = jsoninfo.split('\n');
-        var title = jsoninfo[0];
-        var duration = jsoninfo[2];
-        var hash = crypto.createHash('sha256');
+        let title = jsoninfo[0];
+        let duration = jsoninfo[2];
+        let hash = crypto.createHash('sha256');
         hash.update(jsoninfo[1] + Date.now());
         filename = hash.digest('hex');
         if(duration){
-          var buckets = await bucketManager.getBuckets("DL");
-          var a = duration.split(':');
+          let buckets = await bucketManager.getBuckets("DL");
+          let a = duration.split(':');
           duration = +a.reduce((acc, time) => (60 * acc) + +time);
-          var sTime;
+          let sTime = 0;
           if(data.toFillTime)
             sTime = toFillTime;
           else if (startTime && endTime)
@@ -124,7 +124,7 @@ module.exports = {
             bucketManager.writeBuckets("DL", buckets);
             logger.log("Video uploaded via url" + JSON.stringify(obj));
             res.send("Video uploaded");
-            ytdl.on('close', async function (code){
+            ytdl.on('close', function (code){
               if(code !== 0){
                 logger.error("An error occured while trying to download the video: " + url);
                 res.status(400).send("An error occured while downloading the video");
@@ -134,11 +134,11 @@ module.exports = {
                 if(fs.existsSync("./tmp/" + filename + ".mp4")){
                   fs.unlinkSync("./tmp/" + filename + ".mp4");
                 }
-                bucketManager.unlock("DL");
+                //bucketManager.unlock("DL");
               }
               else{
                 var buckets = await bucketManager.getBuckets("DL");
-                bucketInfo = buckets[bucket];
+                let bucketInfo = buckets[bucket];
                 for(var i=0; i<bucketInfo.length; i++){
                   if(bucketInfo[i].filename != obj.filename){
                     continue;
@@ -147,7 +147,7 @@ module.exports = {
                   logger.log("Video finished downloading " + JSON.stringify(bucketInfo[i]));
                   bucketManager.writeBuckets("DL", buckets);
                 }
-                bucketManager.unlock("DL");
+                //bucketManager.unlock("DL");
               }
             });
           }).catch((e) => {
@@ -160,7 +160,7 @@ module.exports = {
           });
         }
         else{
-          bucketManager.unlock("DL");
+          //bucketManager.unlock("DL");
           const ytdl = exec.spawn('youtube-dl', ['--format=mp4','--output=./tmp/' + filename + '.%(ext)s', url]);
           ytdl.on('close', async function(code){
             if(code !== 0){
@@ -175,11 +175,12 @@ module.exports = {
             }
             else{
               res.send("Video uploaded");
-              buckets = await bucketManager.getBuckets("DL");
+              let buckets = await bucketManager.getBuckets("DL");
               var duration;
               ffmpeg.ffprobe('./tmp/' + filename + '.mp4', function (err, metadata){
                 duration = "" + metadata.format.duration;
-                duration = duration.split(".")[0];
+									duration = duration.split(".")[0];
+									let sTime = 0;
                 if(data.toFillTime)
                 sTime = toFillTime;
                 else if (startTime && endTime)
