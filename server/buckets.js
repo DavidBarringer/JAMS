@@ -58,7 +58,7 @@ module.exports = {
     bucketManager = manager;
   },
 
-  dl: function (form, data, files, ip, res){
+  dl: async function (form, data, files, ip, res){
     let maxDuration = admin.getConfig().bucketLength;
     let filename;
     let bucket;
@@ -124,7 +124,7 @@ module.exports = {
             bucketManager.writeBuckets("DL", buckets);
             logger.log("Video uploaded via url" + JSON.stringify(obj));
             res.send("Video uploaded");
-            ytdl.on('close', function (code){
+            ytdl.on('close', async function (code){
               if(code !== 0){
                 logger.error("An error occured while trying to download the video: " + url);
                 res.status(400).send("An error occured while downloading the video");

@@ -66,7 +66,7 @@ const port = admin.getPort();
 
       app.post('/kill', function(req,res){
         if(admin.adminSession(req.ip) || req.body.songIp == req.ip){
-          bucketManager.kill();
+          player.kill();
           res.send("Done");
         }else{
           res.send("You do not have permission to perform this command.");
